@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#fefcf5">
+<title>Apocathon — Warband Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;1,400&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --sage: #8fa89b;
+  --sage-dark: #6b8477;
+  --sage-light: #c2d0c8;
+  --sage-bg: #b8c9be;
+  --card-bg: #f4f0e8;
+  --card-border: #c8bfa8;
+  --ink: #1a1a2e;
+  --ink-mid: #3a3a50;
+  --ink-soft: #888;
+  --red: #c0392b;
+  --gold: #9b7b2e;
+  --gold-light: #d4a843;
+  --white: #fefcf5;
+  --radius: 10px;
+  --tab-h: 64px;
+  --header-h: 52px;
+}
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  background: var(--sage-bg);
+  font-family: 'Special Elite', serif;
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── HEADER ── */
+.app-header {
+  height: var(--header-h);
+  background: var(--white);
+  border-bottom: 3px solid var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  position: relative;
+  z-index: 50;
+}
+.app-title { font-family: 'Cinzel', serif; font-size: 20px; font-weight: 700; letter-spacing: 0.08em; color: var(--ink); }
+.app-subtitle { font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--sage-dark); }
+.header-right { display: flex; gap: 8px; align-items: center; }
+.hdr-btn {
+  background: transparent;
+  border: 1.5px solid var(--card-border);
+  border-radius: 6px;
+  color: var(--ink-mid);
+  font-family: 'Special Elite', serif;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  padding: 6px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.hdr-btn.gold { background: var(--gold); border-color: var(--gold); color: white; }
+
+/* ── MAIN SCROLL AREA ── */
+.app-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 12px 12px calc(var(--tab-h) + 16px);
+}
+
+/* ── BOTTOM TAB BAR ── */
+.tab-bar {
+  height: var(--tab-h);
+  background: var(--white);
+  border-top: 2px solid var(--card-border);
+  display: flex;
+  align-items: stretch;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 50;
+}
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  padding: 6px 4px;
+  transition: background 0.15s;
+  position: relative;
+}
+.tab-item.active { background: rgba(155,123,46,0.08); }
+.tab-item.active::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 10%; right: 10%;
+  height: 3px;
+  background: var(--gold);
+  border-radius: 0 0 3px 3px;
+}
+.tab-icon { font-size: 20px; line-height: 1; }
+.tab-label { font-family: 'Special Elite', serif; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
+.tab-item.active .tab-label { color: var(--gold); }
+
+/* ── SECTION PAGES ── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── SECTION HEADER ── */
+.sec-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  gap: 8px;
+}
+.sec-title {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sec-title::before { content: ''; display: block; width: 14px; height: 2px; background: var(--gold); }
+
+/* ── WARBAND INFO ── */
+.wb-card {
+  background: var(--white);
+  border: 1.5px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+.field-label {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sage-dark);
+  display: block;
+  margin-bottom: 4px;
+}
+.field-input {
+  font-family: 'Special Elite', serif;
+  font-size: 15px;
+  color: var(--ink);
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid var(--card-border);
+  padding: 4px 2px;
+  width: 100%;
+  outline: none;
+}
+.field-input:focus { border-bottom-color: var(--gold); }
+.field-textarea {
+  font-family: 'Special Elite', serif;
+  font-size: 13px;
+  color: var(--ink);
+  background: rgba(143,168,155,0.06);
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  padding: 8px;
+  width: 100%;
+  min-height: 60px;
+  resize: vertical;
+  outline: none;
+}
+.field-textarea:focus { border-color: var(--gold); }
+.field-row { margin-bottom: 12px; }
+.gold-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(155,123,46,0.08);
+  border: 1.5px solid rgba(155,123,46,0.25);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-top: 4px;
+}
+.gold-icon { font-size: 18px; }
+.gold-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); }
+.gold-val {
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--gold);
+  flex: 1;
+  text-align: center;
+}
+.gold-input {
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--gold);
+  background: transparent;
+  border: none;
+  outline: none;
+  width: 70px;
+  text-align: center;
+  flex: 1;
+}
+.gold-adj { display: flex; gap: 6px; }
+.gold-btn {
+  font-family: 'Cinzel', serif;
+  font-size: 18px;
+  font-weight: 700;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  border: 1.5px solid rgba(155,123,46,0.35);
+  background: transparent;
+  color: var(--gold);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ── HERO CARDS ── */
+.hero-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+
+.hero-card {
+  background: var(--white);
+  border: 1.5px solid var(--card-border);
+  border-radius: var(--radius);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+.hero-card.knocked-out { opacity: 0.55; }
+
+.hero-card-head {
+  background: var(--sage);
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+.hero-num { font-family: 'Cinzel', serif; font-size: 10px; font-weight: 600; letter-spacing: 0.15em; color: rgba(255,255,255,0.7); text-transform: uppercase; flex-shrink: 0; }
+.hero-head-name { font-family: 'Cinzel', serif; font-size: 15px; font-weight: 600; color: white; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hero-head-mash { font-family: 'Special Elite', serif; font-size: 10px; color: rgba(255,255,255,0.75); flex-shrink: 0; }
+.hero-head-hp {
+  font-family: 'Cinzel', serif; font-size: 13px; font-weight: 700;
+  background: rgba(255,255,255,0.2); color: white;
+  border-radius: 5px; padding: 2px 7px; flex-shrink: 0;
+}
+.hero-chevron { color: rgba(255,255,255,0.7); font-size: 12px; flex-shrink: 0; transition: transform 0.2s; }
+.hero-card.open .hero-chevron { transform: rotate(180deg); }
+.hero-card-head .ko-tag { background: var(--red); color: white; font-size: 8px; font-family: 'Cinzel', serif; font-weight: 700; letter-spacing: 0.1em; padding: 2px 6px; border-radius: 3px; flex-shrink: 0; }
+
+.hero-body { display: none; padding: 12px; border-top: 1px solid var(--card-border); }
+.hero-card.open .hero-body { display: block; }
+
+/* Identity row */
+.hero-identity { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; }
+.portrait-box {
+  width: 54px; height: 62px;
+  border: 1.5px dashed var(--card-border);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(143,168,155,0.08);
+  flex-shrink: 0;
+  overflow: hidden;
+  cursor: pointer;
+  font-size: 9px;
+  color: var(--sage-light);
+  text-align: center;
+  line-height: 1.3;
+}
+.portrait-box img { width: 100%; height: 100%; object-fit: cover; }
+.hero-name-area { flex: 1; min-width: 0; }
+.hero-hp-circle {
+  width: 50px; height: 50px;
+  border: 2.5px solid var(--ink);
+  border-radius: 50%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.hero-hp-num { font-family: 'Cinzel', serif; font-size: 18px; font-weight: 700; line-height: 1; }
+.hero-hp-lbl { font-size: 8px; color: var(--sage-dark); letter-spacing: 0.08em; }
+
+/* Field select */
+.field-select {
+  font-family: 'Special Elite', serif;
+  font-size: 14px;
+  color: var(--ink);
+  background: rgba(143,168,155,0.08);
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  width: 100%;
+  outline: none;
+  cursor: pointer;
+  -webkit-appearance: auto;
+}
+
+/* MASH stats */
+.mash-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin-bottom: 10px; }
+.mash-stat { background: rgba(143,168,155,0.12); border: 1px solid var(--card-border); border-radius: 6px; padding: 6px 4px; text-align: center; }
+.mash-val { font-family: 'Cinzel', serif; font-size: 17px; font-weight: 600; line-height: 1; }
+.mash-key { font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sage-dark); margin-top: 2px; }
+
+/* Armor row */
+.armor-row { display: flex; gap: 8px; align-items: flex-end; margin-bottom: 10px; }
+.armor-save-badge {
+  font-family: 'Cinzel', serif; font-size: 13px; font-weight: 600;
+  color: var(--gold); background: rgba(155,123,46,0.1);
+  border: 1px solid rgba(155,123,46,0.3);
+  border-radius: 6px; padding: 6px 10px; white-space: nowrap;
+}
+
+/* Ability */
+.ability-box {
+  background: rgba(143,168,155,0.1);
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+}
+.ability-name { font-family: 'Cinzel', serif; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 3px; }
+.ability-text { font-family: 'Crimson Text', serif; font-style: italic; font-size: 13px; color: var(--ink-mid); line-height: 1.4; }
+
+/* Equipment */
+.equip-slots { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+.equip-slot {
+  display: flex; align-items: center; gap: 6px;
+  border: 1px dashed var(--card-border);
+  border-radius: 6px; padding: 6px 8px; min-height: 40px;
+}
+.equip-num { font-family: 'Cinzel', serif; font-size: 10px; font-weight: 600; color: var(--sage-dark); flex-shrink: 0; width: 14px; }
+.equip-select {
+  font-family: 'Special Elite', serif; font-size: 13px; color: var(--ink);
+  background: transparent; border: none; outline: none; width: 100%; cursor: pointer;
+  -webkit-appearance: auto;
+}
+.equip-custom-input {
+  font-family: 'Special Elite', serif; font-size: 13px; color: var(--ink);
+  background: transparent; border: none; outline: none; flex: 1;
+}
+.equip-custom-input::placeholder { color: var(--sage-light); font-style: italic; }
+.equip-back-btn { background: transparent; border: none; font-size: 16px; color: var(--sage-dark); cursor: pointer; padding: 0 4px; }
+
+/* Relic assign */
+.relic-assign-box { margin-bottom: 10px; }
+.relic-props-preview { font-family: 'Crimson Text', serif; font-style: italic; font-size: 12px; color: var(--gold); line-height: 1.4; margin-top: 4px; }
+
+/* HP track */
+.hp-track-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.dmg-track { display: flex; gap: 4px; flex-wrap: wrap; }
+.dmg-box {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 1.5px solid var(--card-border);
+  background: #e0dbd0;
+  cursor: pointer; flex-shrink: 0;
+}
+.dmg-box.filled { background: var(--red); border-color: var(--red); }
+
+/* Hero actions */
+.hero-actions { display: flex; gap: 6px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--card-border); }
+.hero-act-btn {
+  flex: 1; padding: 8px 4px;
+  border-radius: 6px; border: 1.5px solid var(--card-border);
+  background: transparent; font-family: 'Special Elite', serif;
+  font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--ink-mid); cursor: pointer; text-align: center;
+}
+.hero-act-btn.danger { border-color: rgba(192,57,43,0.4); color: var(--red); }
+.hero-act-btn.ko-btn { border-color: rgba(192,57,43,0.4); color: var(--red); }
+.hero-act-btn.restore-btn { border-color: var(--sage-dark); color: var(--sage-dark); }
+
+/* ── BIG BUTTONS ── */
+.big-btn {
+  display: block; width: 100%;
+  padding: 14px;
+  border-radius: var(--radius);
+  font-family: 'Special Elite', serif;
+  font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase;
+  text-align: center; cursor: pointer;
+  margin-bottom: 8px;
+  border: 2px dashed var(--sage);
+  background: transparent; color: var(--sage-dark);
+  transition: all 0.15s;
+}
+.big-btn:active { background: rgba(143,168,155,0.15); }
+.big-btn.gold-btn { background: var(--gold); border: 2px solid var(--gold); color: white; }
+.big-btn.gold-btn:active { background: var(--gold-light); }
+.big-btn.danger-btn { border-color: rgba(192,57,43,0.3); color: rgba(192,57,43,0.7); }
+.big-btn.danger-btn:active { background: rgba(192,57,43,0.06); }
+.big-btn.random-btn { background: var(--gold); border: 2px solid var(--gold); color: white; margin-bottom: 10px; }
+
+/* ── RELIC CARDS ── */
+.relic-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+.relic-card {
+  background: var(--white);
+  border: 1.5px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+.relic-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.relic-badge {
+  font-family: 'Cinzel', serif; font-size: 9px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  background: var(--gold); color: white; padding: 3px 8px; border-radius: 3px;
+}
+.relic-badge.mundane { background: var(--sage); }
+.relic-del-btn {
+  background: transparent; border: 1px solid rgba(192,57,43,0.3);
+  border-radius: 5px; color: rgba(192,57,43,0.6); font-size: 14px;
+  width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.relic-type { font-family: 'Special Elite', serif; font-size: 14px; font-weight: bold; margin-bottom: 2px; }
+.relic-slots { font-size: 10px; color: var(--sage-dark); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+.relic-props { border-top: 1px solid var(--card-border); padding-top: 6px; margin-bottom: 6px; }
+.relic-prop { font-family: 'Crimson Text', serif; font-style: italic; font-size: 13px; color: var(--gold); line-height: 1.5; padding-left: 12px; position: relative; }
+.relic-prop::before { content: '✦'; position: absolute; left: 0; font-size: 8px; top: 3px; }
+.relic-no-props { font-size: 11px; color: var(--sage-dark); font-style: italic; padding-top: 6px; border-top: 1px solid var(--card-border); margin-bottom: 6px; }
+.relic-assigned { font-size: 10px; color: var(--ink-soft); border-top: 1px solid var(--card-border); padding-top: 5px; }
+.relic-assigned strong { color: var(--ink); }
+.relic-empty { font-family: 'Special Elite', serif; font-size: 12px; color: var(--sage-dark); letter-spacing: 0.08em; text-align: center; padding: 16px 0; }
+
+/* ── QUICK REF ── */
+.qr-section { margin-bottom: 12px; }
+.qr-card { background: var(--white); border: 1.5px solid var(--card-border); border-radius: var(--radius); overflow: hidden; margin-bottom: 8px; }
+.qr-card-head {
+  background: var(--sage); color: white;
+  font-family: 'Cinzel', serif; font-size: 11px; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 8px 12px;
+  display: flex; justify-content: space-between; align-items: center;
+  cursor: pointer; user-select: none;
+}
+.qr-chevron { font-size: 10px; transition: transform 0.2s; }
+.qr-card.open .qr-chevron { transform: rotate(180deg); }
+.qr-card-body { display: none; padding: 10px 12px; }
+.qr-card.open .qr-card-body { display: block; }
+.qr-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.qr-table th { font-family: 'Cinzel', serif; font-size: 9px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sage-dark); border-bottom: 1px solid var(--card-border); padding: 3px 4px; text-align: left; }
+.qr-table td { font-family: 'Special Elite', serif; font-size: 11px; padding: 3px 4px; border-bottom: 1px solid rgba(200,191,168,0.35); vertical-align: top; color: var(--ink-mid); }
+.qr-table td:first-child { font-weight: bold; color: var(--ink); }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: calc(var(--tab-h) + 16px); left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--ink); color: white;
+  font-family: 'Special Elite', serif; font-size: 12px; letter-spacing: 0.08em;
+  padding: 10px 18px; border-radius: 6px;
+  opacity: 0; transition: all 0.2s; pointer-events: none; z-index: 200;
+  border-top: 2px solid var(--gold); white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── BADGE ── */
+.count-badge {
+  font-family: 'Cinzel', serif; font-size: 10px; font-weight: 600;
+  background: var(--ink); color: var(--gold-light);
+  padding: 2px 8px; border-radius: 3px; letter-spacing: 0.08em;
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="app-header">
+  <div>
+    <div class="app-title">APOCATHON</div>
+    <div class="app-subtitle">Warband Builder</div>
+  </div>
+  <div class="header-right">
+    <button class="hdr-btn" onclick="loadFromFile()">⬆</button>
+    <button class="hdr-btn gold" onclick="exportPDF()">⎙ PDF</button>
+  </div>
+</div>
+
+<!-- MAIN BODY -->
+<div class="app-body" id="appBody">
+
+  <!-- PAGE: WARBAND -->
+  <div class="page active" id="page-warband">
+    <div class="wb-card">
+      <div class="field-row">
+        <label class="field-label">Warband Name</label>
+        <input class="field-input" id="wbName" placeholder="Name your warband..." oninput="autosave()">
+      </div>
+      <div class="field-row">
+        <label class="field-label">Patron Deity</label>
+        <input class="field-input" id="wbDeity" placeholder="The god who leads you..." oninput="autosave()">
+      </div>
+      <div class="gold-row">
+        <div class="gold-icon">⚜</div>
+        <div>
+          <div class="gold-label">Gold</div>
+          <input class="gold-input" id="goldAmt" type="number" value="0" min="0" oninput="autosave()">
+        </div>
+        <div class="gold-adj">
+          <button class="gold-btn" onclick="adjGold(-1)">−</button>
+          <button class="gold-btn" onclick="adjGold(1)">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="wb-card">
+      <div class="field-row">
+        <label class="field-label">Notes</label>
+        <textarea class="field-textarea" id="wbNotes" placeholder="Battle notes, tactics..." oninput="autosave()"></textarea>
+      </div>
+      <div class="field-row" style="margin-bottom:0">
+        <label class="field-label">Lore</label>
+        <textarea class="field-textarea" id="wbLore" placeholder="The story of your warband..." oninput="autosave()"></textarea>
+      </div>
+    </div>
+    <button class="big-btn danger-btn" onclick="clearAll()">↺ Reset Everything</button>
+  </div>
+
+  <!-- PAGE: HEROES -->
+  <div class="page" id="page-heroes">
+    <div class="sec-head">
+      <span class="sec-title">Heroes</span>
+      <span class="count-badge" id="heroCount">0 / 6</span>
+    </div>
+    <button class="big-btn random-btn" onclick="generateWarband()">⚄ Random Warband</button>
+    <div class="hero-list" id="heroList"></div>
+    <button class="big-btn" id="addHeroBtn" onclick="addHero()">⚔ Recruit a Hero</button>
+  </div>
+
+  <!-- PAGE: RELICS -->
+  <div class="page" id="page-relics">
+    <div class="sec-head">
+      <span class="sec-title">Magic Relics</span>
+    </div>
+    <button class="big-btn gold-btn" style="margin-bottom:6px" onclick="genRelic(false)">✦ Generate Magic Relic</button>
+    <button class="big-btn" style="border-style:solid;border-color:var(--sage-dark);color:var(--sage-dark);margin-bottom:10px" onclick="genRelic(true)">⬡ Generate Mundane Relic</button>
+    <div class="relic-list" id="relicList"></div>
+  </div>
+
+  <!-- PAGE: REFERENCE -->
+  <div class="page" id="page-ref">
+    <div class="sec-head"><span class="sec-title">Quick Reference</span></div>
+
+    <div class="qr-card open" id="qr-mash">
+      <div class="qr-card-head" onclick="toggleQR('qr-mash')">MASH Stats <span class="qr-chevron">▼</span></div>
+      <div class="qr-card-body">
+        <table class="qr-table">
+          <tr><th>MASH</th><th>M</th><th>A</th><th>S</th><th>HP</th></tr>
+          <tr><td>Ranger</td><td>+2</td><td>+3</td><td>+1</td><td>6</td></tr>
+          <tr><td>Berserker</td><td>+3</td><td>+1</td><td>+2</td><td>8</td></tr>
+          <tr><td>Healer</td><td>+2</td><td>+1</td><td>+3</td><td>6</td></tr>
+          <tr><td>Knight</td><td>+2</td><td>+2</td><td>+1</td><td>8</td></tr>
+          <tr><td>Creature</td><td>+3</td><td>+1</td><td>+2</td><td>6</td></tr>
+          <tr><td>Soldier</td><td>+3</td><td>+2</td><td>+1</td><td>8</td></tr>
+          <tr><td>Rogue</td><td>+2</td><td>+3</td><td>+1</td><td>6</td></tr>
+          <tr><td>Mage</td><td>+1</td><td>+2</td><td>+3</td><td>6</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="qr-card" id="qr-abilities">
+      <div class="qr-card-head" onclick="toggleQR('qr-abilities')">Abilities <span class="qr-chevron">▼</span></div>
+      <div class="qr-card-body">
+        <table class="qr-table">
+          <tr><th>MASH</th><th>Ability</th></tr>
+          <tr><td>Ranger</td><td>Sharpshooter: ignore cover −2 penalty</td></tr>
+          <tr><td>Berserker</td><td>Rage: free attack after K.O.</td></tr>
+          <tr><td>Healer</td><td>Healing: 1d6+Soul to nearby ally</td></tr>
+          <tr><td>Knight</td><td>Steadfast: survive 1st K.O. at 1 HP</td></tr>
+          <tr><td>Creature</td><td>Frenzy: extra order at ≤3 HP</td></tr>
+          <tr><td>Soldier</td><td>Veteran: no free attacks on disengage</td></tr>
+          <tr><td>Rogue</td><td>Cat Burglar: vertical move is free</td></tr>
+          <tr><td>Mage</td><td>Subtype ability (costs 2 Orders)</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="qr-card" id="qr-armor">
+      <div class="qr-card-head" onclick="toggleQR('qr-armor')">Armor Saves <span class="qr-chevron">▼</span></div>
+      <div class="qr-card-body">
+        <table class="qr-table">
+          <tr><th>Armor</th><th>Save</th><th>Cost</th></tr>
+          <tr><td>None</td><td>—</td><td>Free</td></tr>
+          <tr><td>Light</td><td>5+</td><td>2g</td></tr>
+          <tr><td>Medium</td><td>4+</td><td>6g</td></tr>
+          <tr><td>Heavy</td><td>3+</td><td>10g</td></tr>
+          <tr><td>Shield</td><td>+1 / 6+</td><td>5g</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="qr-card" id="qr-weapons">
+      <div class="qr-card-head" onclick="toggleQR('qr-weapons')">Weapons <span class="qr-chevron">▼</span></div>
+      <div class="qr-card-body">
+        <table class="qr-table">
+          <tr><th>Weapon</th><th>Bonus</th><th>Dmg</th><th>Cost</th></tr>
+          <tr><td>Sm. Blunt</td><td>M/A</td><td>1</td><td>2g</td></tr>
+          <tr><td>Sm. Sharp</td><td>A</td><td>1</td><td>2g</td></tr>
+          <tr><td>Md. Blunt</td><td>M</td><td>2</td><td>4g</td></tr>
+          <tr><td>Md. Sharp</td><td>M/A</td><td>2</td><td>4g</td></tr>
+          <tr><td>Lg. Blunt</td><td>M</td><td>3</td><td>6g</td></tr>
+          <tr><td>Lg. Sharp</td><td>M</td><td>3</td><td>6g</td></tr>
+          <tr><td>Trad. Ranged</td><td>A</td><td>3</td><td>6g</td></tr>
+          <tr><td>Mech. Ranged</td><td>A</td><td>4</td><td>8g</td></tr>
+          <tr><td>Sm. Firearm</td><td>A</td><td>4</td><td>8g</td></tr>
+          <tr><td>Lg. Firearm</td><td>A</td><td>5</td><td>10g</td></tr>
+          <tr><td>Sm. Magic</td><td>S</td><td>2</td><td>4g</td></tr>
+          <tr><td>Md. Magic</td><td>S</td><td>3</td><td>6g</td></tr>
+          <tr><td>Lg. Magic</td><td>S</td><td>4</td><td>8g</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="qr-card" id="qr-combat">
+      <div class="qr-card-head" onclick="toggleQR('qr-combat')">Combat Rules <span class="qr-chevron">▼</span></div>
+      <div class="qr-card-body">
+        <table class="qr-table">
+          <tr><td colspan="2" style="padding-bottom:4px;font-style:italic;color:var(--ink-mid);">Each turn: Lead one model, take 2 Orders (Move or Attack in any combo).</td></tr>
+          <tr><td>Move</td><td>Up to 6″ per order (9″ mounted)</td></tr>
+          <tr><td>Attack</td><td>Roll 2d6 + MASH stat ≥ 9 to hit</td></tr>
+          <tr><td>Cover</td><td>Half-obscured: −2 to attack roll</td></tr>
+          <tr><td>Save</td><td>Roll d6 vs armor threshold to block</td></tr>
+          <tr><td>Disengage</td><td>Moving out of 1″ triggers enemy free attack</td></tr>
+          <tr><td>K.O.</td><td>Reach 0 HP — cannot be led</td></tr>
+          <tr><td>Melee</td><td>Target within 1″</td></tr>
+          <tr><td>Throw</td><td>Melee weapon up to 6″</td></tr>
+          <tr><td>Ranged/Magic</td><td>Any target in line of sight</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /app-body -->
+
+<!-- BOTTOM TAB BAR -->
+<div class="tab-bar">
+  <button class="tab-item active" id="tab-warband" onclick="showTab('warband')">
+    <span class="tab-icon">🏰</span>
+    <span class="tab-label">Warband</span>
+  </button>
+  <button class="tab-item" id="tab-heroes" onclick="showTab('heroes')">
+    <span class="tab-icon">⚔️</span>
+    <span class="tab-label">Heroes</span>
+  </button>
+  <button class="tab-item" id="tab-relics" onclick="showTab('relics')">
+    <span class="tab-icon">✦</span>
+    <span class="tab-label">Relics</span>
+  </button>
+  <button class="tab-item" id="tab-ref" onclick="showTab('ref')">
+    <span class="tab-icon">📖</span>
+    <span class="tab-label">Rules</span>
+  </button>
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="fileInput" accept=".json" style="display:none" onchange="handleFileLoad(event)">
+
+<script>
+// ── DATA ──
+const EQUIP_OPTIONS = [
+  { value:'', label:'— empty —' },
+  { divider:true, label:'── Melee ──' },
+  { value:'Small Blunt (Might/Acc, 1 dmg)', label:'Small Blunt · M/A · 1 dmg' },
+  { value:'Small Sharp (Acc, 1 dmg)', label:'Small Sharp · Acc · 1 dmg' },
+  { value:'Medium Blunt (Might, 2 dmg)', label:'Medium Blunt · Might · 2 dmg' },
+  { value:'Medium Sharp (Might/Acc, 2 dmg)', label:'Medium Sharp · M/A · 2 dmg' },
+  { value:'Large Blunt (Might, 3 dmg) [2 slots]', label:'Large Blunt · Might · 3 dmg [2 slots]' },
+  { value:'Large Sharp (Might, 3 dmg) [2 slots]', label:'Large Sharp · Might · 3 dmg [2 slots]' },
+  { divider:true, label:'── Ranged ──' },
+  { value:'Traditional Ranged (Acc, 3 dmg)', label:'Traditional Ranged · Acc · 3 dmg' },
+  { value:'Mechanical Ranged (Acc, 4 dmg)', label:'Mechanical Ranged · Acc · 4 dmg' },
+  { value:'Small Firearm (Acc, 4 dmg)', label:'Small Firearm · Acc · 4 dmg' },
+  { value:'Large Firearm (Acc, 5 dmg) [2 slots]', label:'Large Firearm · Acc · 5 dmg [2 slots]' },
+  { divider:true, label:'── Magic ──' },
+  { value:'Small Magic (Soul, 2 dmg)', label:'Small Magic · Soul · 2 dmg' },
+  { value:'Medium Magic (Soul, 3 dmg)', label:'Medium Magic · Soul · 3 dmg' },
+  { value:'Large Magic (Soul, 4 dmg) [2 slots]', label:'Large Magic · Soul · 4 dmg [2 slots]' },
+  { divider:true, label:'── Armor ──' },
+  { value:'Light Armor (save 5+)', label:'Light Armor · Save 5+' },
+  { value:'Medium Armor (save 4+) [2 slots]', label:'Medium Armor · Save 4+ [2 slots]' },
+  { value:'Heavy Armor (save 3+) [2 slots]', label:'Heavy Armor · Save 3+ [2 slots]' },
+  { value:'Shield (+1 save / 6+ if no armor)', label:'Shield · +1 Save / 6+' },
+  { divider:true, label:'── Special ──' },
+  { value:'Revive Potion (revive K.O. ally to full HP)', label:'Revive Potion' },
+  { value:'Explosive (5 dmg in 4" of target point)', label:'Explosive · 5 dmg radius' },
+  { value:'Healing Potion (regain 1d6 HP)', label:'Healing Potion · 1d6 HP' },
+  { value:"Summoner's Stone (place terrain object within 12\")", label:"Summoner's Stone" },
+  { value:'Mundane Relic (see Magic Relics)', label:'Mundane Relic' },
+  { value:'Magic Relic (see Magic Relics) [2 slots]', label:'Magic Relic [2 slots]' },
+  { divider:true, label:'── Custom ──' },
+  { value:'__custom__', label:'Custom...' },
+];
+
+const MASH = {
+  Ranger:    { m:'+2', a:'+3', s:'+1', hp:6,  ability:'Sharpshooter', abilityText:'Shooting at a model in cover does not cause you to take a −2 penalty to the attack roll.' },
+  Berserker: { m:'+3', a:'+1', s:'+2', hp:8,  ability:'Rage', abilityText:'When you knock out a model, you may immediately take another free attack order.' },
+  Healer:    { m:'+2', a:'+1', s:'+3', hp:6,  ability:'Healing', abilityText:'Roll 1d6 and add your Soul. A model within 1″ of you regains that much Health. Can be used on yourself.' },
+  Knight:    { m:'+2', a:'+2', s:'+1', hp:8,  ability:'Steadfast', abilityText:'When you are knocked out for the first time each battle, you may instead go to 1 Health.' },
+  Creature:  { m:'+3', a:'+1', s:'+2', hp:6,  ability:'Frenzy', abilityText:'When you have 3 or less Health, you may take an extra order each time you are led.' },
+  Soldier:   { m:'+3', a:'+2', s:'+1', hp:8,  ability:'Veteran', abilityText:'When you move out of 1″ from a model, that model does not make a free attack on you.' },
+  Rogue:     { m:'+2', a:'+3', s:'+1', hp:6,  ability:'Cat Burglar', abilityText:'Moving vertically does not expend Move distance.' },
+  Mage:      { m:'+1', a:'+2', s:'+3', hp:6,  ability:'Mage Subtype', abilityText:'Choose a subtype below.' },
+};
+const MAGE_SUBTYPES = {
+  Druid:       { ability:'Druid', abilityText:'For 2 Orders, summon a Beast within 4″ of you.' },
+  Necromancer: { ability:'Necromancer', abilityText:'For 2 Orders, summon an Undead within 4″ of you under your control.' },
+  Enchanter:   { ability:'Enchanter', abilityText:'For 2 Orders, control the target during their next activation.' },
+  'War Mage':  { ability:'War Mage', abilityText:'Magic weapons you use deal +2 damage.' },
+};
+const ARMOR_SAVES = { None:'—', Light:'5+', Medium:'4+', Heavy:'3+', Shield:'+1 / 6+' };
+
+const RELIC_PROPERTIES = {
+  11:'Rangerbane (×2 Dmg to Rangers; ½ dmg from Rangers)',
+  12:'Roguebane (×2 Dmg to Rogues; ½ dmg from Rogues)',
+  13:'Knightbane (×2 Dmg to Knights; ½ dmg from Knights)',
+  14:'Soldierbane (×2 Dmg to Soldiers; ½ dmg from Soldiers)',
+  15:'Magebane (×2 Dmg to Mages; ½ dmg from Mages)',
+  16:'Healerbane (×2 Dmg to Healers; ½ dmg from Healers)',
+  21:'Creaturebane (×2 Dmg to Creatures; ½ dmg from Creatures)',
+  22:'Berserkerbane (×2 Dmg to Berserkers; ½ dmg from Berserkers)',
+  23:'Undeadbane (×2 Dmg to Undead; ½ dmg from Goblinoids)',
+  24:'Goblinoidbane (×2 Dmg to Goblinoids; ½ dmg from Rangers)',
+  25:'Dragonbane (×2 Dmg to Dragons; ½ dmg from Dragons)',
+  26:'Leaderbane (×2 Dmg to Leaders; ½ dmg from Leaders)',
+  31:'Frost Rune (Damaged target can\'t move next turn)',
+  32:'Flame Rune (+2 Damage; +1 to Save)',
+  33:'Blood Rune (+1 to Hit; +1 to Save)',
+  34:'Strength Rune (+1 to Might)',
+  35:'Eye Rune (+1 to Accuracy)',
+  36:'Spirit Rune (+1 to Soul)',
+  41:'Stealth Shadow (Always Hidden except in Melee)',
+  42:'Wings of Flight (Ignore vertical distance)',
+  43:'Watersign (Move normally in water)',
+  44:'Blinkwalk (Teleport 9″ for 1 Order)',
+  45:'Rescuemark (Teleport to friendly for 2 Orders)',
+  46:'Wallwalk (Move through objects freely)',
+  51:'Necromantic (Summon 1 Undead for 2 Orders)',
+  52:'Druidic (Summon 1 Beast for 2 Orders)',
+  53:'Hordecaller (Summon 1 Goblinoid for 2 Orders)',
+  54:'Roughrider (Summon a Mount for 2 Orders)',
+  55:'Hypnotic (−2 to Hit against you)',
+  56:'Vampiron (K.O.\'d enemy becomes Undead ally)',
+  61:'Terrifying (Force model to move 9″ away for 2 Orders)',
+  62:'Spellhatred (Immune to Magic weapon damage)',
+  63:'Forcefield (Immune to Ranged weapon damage)',
+  64:'Vorpal (+2 to Hit; +2 to Save)',
+  65:'Lightningfire (×2 Attacks or ×2 Moves for 1 Order)',
+  66:'Phoenixtouch (Revive K.O.\'d model for 2 Orders)',
+};
+
+function d6(){ return Math.floor(Math.random()*6)+1; }
+
+// ── STATE ──
+let heroes = [], relics = [], nextId = 0, nextRelicId = 0;
+
+function defaultHero() {
+  return {
+    id: nextId++, name:'', mash:'', mageSubtype:'',
+    armorType:'None', equip:['','','',''],
+    equipCustom:[false,false,false,false],
+    assignedRelicId:null, dmgBoxes:Array(16).fill(false),
+    knockedOut:false, portrait:null, open:false,
+  };
+}
+
+// ── TABS ──
+function showTab(tab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-'+tab).classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.getElementById('appBody').scrollTop = 0;
+}
+
+// ── QR ACCORDION ──
+function toggleQR(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+// ── RENDER HEROES ──
+function render() {
+  renderHeroes();
+  renderRelics();
+  document.getElementById('heroCount').textContent = heroes.length + ' / 6';
+  document.getElementById('addHeroBtn').style.display = heroes.length >= 6 ? 'none' : 'block';
+}
+
+function renderHeroes() {
+  const list = document.getElementById('heroList');
+  list.innerHTML = '';
+  heroes.forEach((h, idx) => list.appendChild(buildHeroCard(h, idx)));
+}
+
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function buildHeroCard(h, idx) {
+  const div = document.createElement('div');
+  div.className = 'hero-card' + (h.knockedOut?' knocked-out':'') + (h.open?' open':'');
+  div.id = 'hcard-'+h.id;
+
+  const md = MASH[h.mash]||{};
+  const isMage = h.mash==='Mage';
+  const sub = isMage && h.mageSubtype ? MAGE_SUBTYPES[h.mageSubtype] : null;
+  const abilityName = sub ? sub.ability : (md.ability||'—');
+  const abilityText = sub ? sub.abilityText : (md.abilityText||'Select a MASH to see ability.');
+  const maxHP = md.hp || 0;
+  const assignedRelic = relics.find(r=>r.id===h.assignedRelicId);
+
+  const equipOpts = EQUIP_OPTIONS.map(o => o.divider
+    ? `<optgroup label="${o.label}"></optgroup>`
+    : `<option value="${esc(o.value)}" ${(h.equip[0]||'')=== o.value?'selected':''}>${o.label}</option>`
+  ).join('');
+
+  const equipSlots = [0,1,2,3].map(i => {
+    const isCustom = h.equipCustom[i];
+    return `<div class="equip-slot">
+      <span class="equip-num">${i+1}</span>
+      ${isCustom
+        ? `<input class="equip-custom-input" placeholder="Custom item..." value="${esc(h.equip[i]||'')}" oninput="updateEquip(${h.id},${i},this.value)">
+           <button class="equip-back-btn" onclick="clearCustomEquip(${h.id},${i})">↩</button>`
+        : `<select class="equip-select" onchange="updateEquip(${h.id},${i},this.value)">
+             ${EQUIP_OPTIONS.map(o => o.divider
+               ? `<optgroup label="${o.label}"></optgroup>`
+               : `<option value="${esc(o.value)}" ${(h.equip[i]||'')=== o.value?'selected':''}>${o.label}</option>`
+             ).join('')}
+           </select>`
+      }
+    </div>`;
+  }).join('');
+
+  const dmgBoxes = h.dmgBoxes.map((f,i)=>
+    `<div class="dmg-box${f?' filled':''}" onclick="toggleDmg(${h.id},${i})"></div>`
+  ).join('');
+
+  div.innerHTML = `
+    <div class="hero-card-head" onclick="toggleHero(${h.id})">
+      <span class="hero-num">#${idx+1}</span>
+      <span class="hero-head-name">${h.name||'Unnamed Hero'}</span>
+      ${h.mash ? `<span class="hero-head-mash">${h.mash}${isMage&&h.mageSubtype?' · '+h.mageSubtype:''}</span>` : ''}
+      ${maxHP ? `<span class="hero-head-hp">${maxHP} HP</span>` : ''}
+      ${h.knockedOut ? `<span class="ko-tag">K.O.</span>` : ''}
+      <span class="hero-chevron">▼</span>
+    </div>
+    <div class="hero-body">
+      <div class="hero-identity">
+        <div class="portrait-box" onclick="uploadPortrait(${h.id})" id="portrait-${h.id}">
+          ${h.portrait ? `<img src="${h.portrait}" alt="">` : 'tap<br>portrait'}
+        </div>
+        <div class="hero-name-area">
+          <label class="field-label">Name</label>
+          <input class="field-input" placeholder="Hero name..." value="${esc(h.name)}" oninput="updateField(${h.id},'name',this.value)" style="font-size:16px">
+          <div style="height:8px"></div>
+          <label class="field-label">MASH</label>
+          <select class="field-select" onchange="updateMash(${h.id},this.value)">
+            <option value="">— Select MASH —</option>
+            ${Object.keys(MASH).map(k=>`<option value="${k}" ${h.mash===k?'selected':''}>${k}</option>`).join('')}
+          </select>
+        </div>
+        <div class="hero-hp-circle">
+          <div class="hero-hp-num">${maxHP||'—'}</div>
+          <div class="hero-hp-lbl">HP</div>
+        </div>
+      </div>
+
+      ${isMage ? `
+      <div class="field-row">
+        <label class="field-label">Mage Path</label>
+        <select class="field-select" onchange="updateField(${h.id},'mageSubtype',this.value);render();autosave()">
+          <option value="">— Choose path —</option>
+          ${Object.keys(MAGE_SUBTYPES).map(k=>`<option value="${k}" ${h.mageSubtype===k?'selected':''}>${k}</option>`).join('')}
+        </select>
+      </div>` : ''}
+
+      <div class="mash-row">
+        <div class="mash-stat"><div class="mash-val">${md.m||'—'}</div><div class="mash-key">Might</div></div>
+        <div class="mash-stat"><div class="mash-val">${md.a||'—'}</div><div class="mash-key">Accuracy</div></div>
+        <div class="mash-stat"><div class="mash-val">${md.s||'—'}</div><div class="mash-key">Soul</div></div>
+      </div>
+
+      <div class="armor-row">
+        <div style="flex:1">
+          <label class="field-label">Armor</label>
+          <select class="field-select" onchange="updateField(${h.id},'armorType',this.value);render();autosave()">
+            ${Object.keys(ARMOR_SAVES).map(k=>`<option value="${k}" ${h.armorType===k?'selected':''}>${k}</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Save</label>
+          <div class="armor-save-badge">${ARMOR_SAVES[h.armorType]||'—'}</div>
+        </div>
+      </div>
+
+      <div class="ability-box">
+        <div class="ability-name">${abilityName}</div>
+        <div class="ability-text">${abilityText}</div>
+      </div>
+
+      <label class="field-label" style="margin-bottom:6px">Equipment (4 slots)</label>
+      <div class="equip-slots">${equipSlots}</div>
+
+      <div class="relic-assign-box">
+        <label class="field-label">Magic Relic</label>
+        <select class="field-select" onchange="assignRelic(${h.id},this.value)">
+          <option value="">— none assigned —</option>
+          ${relics.map(r=>`<option value="${r.id}" ${h.assignedRelicId===r.id?'selected':''}>${r.mundane?'[Mundane] ':'[Magic] '}${r.type}${r.props.length?' · '+r.props.length+' prop'+(r.props.length>1?'s':''):''}</option>`).join('')}
+        </select>
+        ${assignedRelic&&assignedRelic.props.length ? `<div class="relic-props-preview">${assignedRelic.props.join(' / ')}</div>` : ''}
+      </div>
+
+      <div class="hp-track-row" style="margin-bottom:10px">
+        <span class="field-label" style="margin:0">HP Track</span>
+        <div class="dmg-track">${dmgBoxes}</div>
+      </div>
+
+      <div class="hero-actions">
+        <button class="hero-act-btn ${h.knockedOut?'restore-btn':'ko-btn'}" onclick="${h.knockedOut?'restoreHero':'koHero'}(${h.id})">
+          ${h.knockedOut ? '↩ Restore' : '✕ K.O.'}
+        </button>
+        <button class="hero-act-btn" onclick="moveHero(${h.id},-1)">↑ Up</button>
+        <button class="hero-act-btn" onclick="moveHero(${h.id},1)">↓ Down</button>
+        <button class="hero-act-btn danger" onclick="removeHero(${h.id})">🗑 Remove</button>
+      </div>
+    </div>
+  `;
+  return div;
+}
+
+// ── RENDER RELICS ──
+function renderRelics() {
+  const list = document.getElementById('relicList');
+  if (relics.length === 0) {
+    list.innerHTML = `<div class="relic-empty">No relics yet — generate one above!</div>`;
+    return;
+  }
+  list.innerHTML = '';
+  relics.forEach(r => {
+    const assignee = heroes.find(h=>h.assignedRelicId===r.id);
+    const div = document.createElement('div');
+    div.className = 'relic-card';
+    div.innerHTML = `
+      <div class="relic-card-top">
+        <span class="relic-badge ${r.mundane?'mundane':''}">${r.mundane?'Mundane':'Magic'}</span>
+        <button class="relic-del-btn" onclick="removeRelic('${r.id}')">🗑</button>
+      </div>
+      <div class="relic-type">${r.type}</div>
+      <div class="relic-slots">${r.slots} slot${r.slots>1?'s':''}</div>
+      ${r.props.length
+        ? `<div class="relic-props">${r.props.map(p=>`<div class="relic-prop">${p}</div>`).join('')}</div>`
+        : `<div class="relic-no-props">No magical properties.</div>`
+      }
+      <div class="relic-assigned">${assignee?`✦ Assigned to <strong>${assignee.name||'Hero '+(heroes.indexOf(assignee)+1)}</strong>`:'Unassigned'}</div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+// ── MUTATIONS ──
+function toggleHero(id) {
+  const h = heroes.find(h=>h.id===id);
+  if(!h) return;
+  h.open = !h.open;
+  const card = document.getElementById('hcard-'+id);
+  if(card) card.classList.toggle('open', h.open);
+}
+
+function addHero() {
+  if(heroes.length>=6){ showToast('A Warband holds 6 heroes!'); return; }
+  const h = defaultHero();
+  h.open = true;
+  heroes.push(h);
+  render();
+  autosave();
+  // scroll to bottom
+  setTimeout(()=>{ document.getElementById('appBody').scrollTop = 99999; }, 50);
+}
+
+function removeHero(id) {
+  heroes = heroes.filter(h=>h.id!==id);
+  render(); autosave();
+}
+
+function moveHero(id, dir) {
+  const idx = heroes.findIndex(h=>h.id===id);
+  const ni = idx+dir;
+  if(ni<0||ni>=heroes.length) return;
+  [heroes[idx],heroes[ni]]=[heroes[ni],heroes[idx]];
+  render(); autosave();
+}
+
+function koHero(id) {
+  const h = heroes.find(h=>h.id===id);
+  if(!h) return;
+  h.knockedOut = true;
+  render(); autosave();
+}
+function restoreHero(id) {
+  const h = heroes.find(h=>h.id===id);
+  if(!h) return;
+  h.knockedOut = false;
+  render(); autosave();
+}
+
+function updateField(id, field, val) {
+  const h = heroes.find(h=>h.id===id);
+  if(!h) return;
+  h[field] = val;
+  // update header name live
+  const nameEl = document.querySelector(`#hcard-${id} .hero-head-name`);
+  if(field==='name' && nameEl) nameEl.textContent = val||'Unnamed Hero';
+  autosave();
+}
+
+function updateMash(id, mash) {
+  const h = heroes.find(h=>h.id===id);
+  if(!h) return;
+  h.mash = mash; h.mageSubtype = '';
+  const md = MASH[mash];
+  if(md){ h.maxHP = md.hp; h.currentHP = md.hp; }
+  render(); autosave();
+}
+
+function updateEquip(id, slot, val) {
+  const h = heroes.find(h=>h.id===id);
+  if(!h) return;
+  if(val==='__custom__'){
+    h.equipCustom[slot]=true; h.equip[slot]='';
+    render();
+  } else {
+    h.equip[slot]=val;
+  }
+  autosave();
+}
+
+function clearCustomEquip(id, slot) {
+  const h = heroes.find(h=>h.id===id);
+  if(!h) return;
+  h.equipCustom[slot]=false; h.equip[slot]='';
+  render(); autosave();
+}
+
+function toggleDmg(id, i) {
+  const h = heroes.find(h=>h.id===id);
+  if(!h) return;
+  h.dmgBoxes[i] = !h.dmgBoxes[i];
+  const boxes = document.querySelectorAll(`#hcard-${id} .dmg-box`);
+  if(boxes[i]) boxes[i].className = 'dmg-box'+(h.dmgBoxes[i]?' filled':'');
+  autosave();
+}
+
+function uploadPortrait(id) {
+  const inp = document.createElement('input');
+  inp.type='file'; inp.accept='image/*';
+  inp.onchange = e => {
+    const file = e.target.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const h = heroes.find(h=>h.id===id); if(!h) return;
+      h.portrait = ev.target.result;
+      const box = document.getElementById('portrait-'+id);
+      if(box) box.innerHTML = `<img src="${ev.target.result}" alt="">`;
+      autosave();
+    };
+    reader.readAsDataURL(file);
+  };
+  inp.click();
+}
+
+// ── RELICS ──
+function generateRelic(mundane) {
+  const t=d6(); let type, slots=1;
+  if(t===1){const sz=['Small','Medium','Large'][d6()<=2?0:d6()<=4?1:2];type=`${sz} ${d6()<=3?'Sharp':'Blunt'} Melee Weapon`;if(sz==='Large')slots=2;}
+  else if(t===2){type='Medium Melee Weapon — '+(d6()<=3?'Sharp':'Blunt');}
+  else if(t===3){type='Large Melee Weapon — '+(d6()<=3?'Sharp':'Blunt');slots=2;}
+  else if(t===4){const r=d6();let st;if(r<=2)st='Traditional Ranged';else if(r<=4)st='Mechanical Ranged';else{st=(d6()<=3?'Small':'Large')+' Firearm';if(st.startsWith('Large'))slots=2;}type=st+' (Ranged)';}
+  else if(t===5){const ar=d6();type=ar===1?'Light Armor':ar<=3?'Medium Armor':ar<=5?'Heavy Armor':'Shield';slots=2;}
+  else{const sz=['Small','Medium','Large'][d6()<=2?0:d6()<=4?1:2];type=`${sz} Magic Weapon`;if(sz==='Large')slots=2;}
+  const props=[];
+  if(!mundane){const n=d6()<=2?1:d6()<=4?2:3;for(let i=0;i<n;i++){const k=d6()*10+d6();props.push(RELIC_PROPERTIES[k]||RELIC_PROPERTIES[11]);}}
+  return { id:'r'+(nextRelicId++), type, slots, props, mundane, assignedTo:null };
+}
+
+function genRelic(mundane) {
+  relics.push(generateRelic(mundane));
+  renderRelics();
+  autosave();
+  showToast(mundane?'Mundane Relic generated!':'Magic Relic generated!');
+  showTab('relics');
+}
+
+function removeRelic(rid) {
+  heroes.forEach(h=>{ if(h.assignedRelicId===rid) h.assignedRelicId=null; });
+  relics = relics.filter(r=>r.id!==rid);
+  render(); autosave();
+}
+
+function assignRelic(heroId, rid) {
+  const h = heroes.find(h=>h.id===heroId); if(!h) return;
+  if(rid) heroes.forEach(oh=>{ if(oh.id!==heroId&&oh.assignedRelicId===rid) oh.assignedRelicId=null; });
+  h.assignedRelicId = rid||null;
+  render(); autosave();
+}
+
+// ── GOLD ──
+function adjGold(d) {
+  const el=document.getElementById('goldAmt');
+  el.value=Math.max(0,(parseInt(el.value)||0)+d);
+  autosave();
+}
+
+// ── RANDOM WARBAND ──
+function generateWarband() {
+  if(heroes.length>0 && !confirm('Replace current warband with 6 random heroes?')) return;
+  heroes=[]; nextId=0;
+  const mashKeys=Object.keys(MASH);
+  const subKeys=Object.keys(MAGE_SUBTYPES);
+  const armorOpts=Object.keys(ARMOR_SAVES);
+  const single=EQUIP_OPTIONS.filter(o=>o.value&&!o.divider&&o.value!=='__custom__'&&!o.value.includes('[2 slots]')).map(o=>o.value);
+  const double=EQUIP_OPTIONS.filter(o=>o.value&&!o.divider&&o.value!=='__custom__'&&o.value.includes('[2 slots]')).map(o=>o.value);
+  const pick=arr=>arr[Math.floor(Math.random()*arr.length)];
+  for(let i=0;i<6;i++){
+    const h=defaultHero();
+    h.mash=pick(mashKeys);
+    const md=MASH[h.mash];
+    h.maxHP=md.hp; h.currentHP=md.hp;
+    if(h.mash==='Mage') h.mageSubtype=pick(subKeys);
+    h.armorType=pick(armorOpts);
+    if(Math.random()<0.35&&double.length){
+      h.equip=[pick(double),'',pick(single),''];
+    } else {
+      const e1=pick(single); let e2=pick(single);
+      for(let t=0;t<5;t++){if(e2!==e1)break;e2=pick(single);}
+      h.equip=[e1,e2,'',''];
+    }
+    heroes.push(h);
+  }
+  render(); autosave();
+  showToast('Random warband recruited!');
+  showTab('heroes');
+}
+
+// ── SAVE / LOAD ──
+function gatherState() {
+  return {
+    wbName: document.getElementById('wbName').value,
+    wbDeity: document.getElementById('wbDeity').value,
+    wbNotes: document.getElementById('wbNotes').value,
+    wbLore: document.getElementById('wbLore').value,
+    gold: document.getElementById('goldAmt').value,
+    heroes, relics, nextId, nextRelicId,
+  };
+}
+
+function autosave() {
+  try { localStorage.setItem('apocathon_mobile', JSON.stringify(gatherState())); } catch(e){}
+}
+
+function loadState(s) {
+  if(!s) return;
+  document.getElementById('wbName').value = s.wbName||'';
+  document.getElementById('wbDeity').value = s.wbDeity||'';
+  document.getElementById('wbNotes').value = s.wbNotes||'';
+  document.getElementById('wbLore').value = s.wbLore||'';
+  document.getElementById('goldAmt').value = s.gold||0;
+  heroes = (s.heroes||[]).map(h=>({...defaultHero(),...h,dmgBoxes:h.dmgBoxes||Array(16).fill(false),equip:h.equip||['','','',''],equipCustom:h.equipCustom||[false,false,false,false],open:false}));
+  nextId = s.nextId||heroes.length;
+  relics = s.relics||[];
+  nextRelicId = s.nextRelicId||relics.length;
+  render();
+}
+
+function clearAll() {
+  if(!confirm('Reset everything? This cannot be undone.')) return;
+  heroes=[]; relics=[]; nextId=0; nextRelicId=0;
+  ['wbName','wbDeity','wbNotes','wbLore'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('goldAmt').value='0';
+  render(); autosave();
+  showToast('Warband reset.');
+  showTab('warband');
+}
+
+function loadFromFile() {
+  document.getElementById('fileInput').click();
+}
+
+function handleFileLoad(e) {
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{ loadState(JSON.parse(ev.target.result)); showToast('Warband loaded!'); }
+    catch(err){ showToast('Error reading file.'); }
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+
+// ── PDF EXPORT ──
+function exportPDF() {
+  const s = gatherState();
+  function heroHTML(h,idx){
+    const md=MASH[h.mash]||{};
+    const isMage=h.mash==='Mage';
+    const sub=isMage&&h.mageSubtype?MAGE_SUBTYPES[h.mageSubtype]:null;
+    const abilityName=sub?sub.ability:(md.ability||'—');
+    const abilityText=sub?sub.abilityText:(md.abilityText||'');
+    const maxHP=md.hp||0;
+    const ar=ARMOR_SAVES[h.armorType]||'—';
+    const assignedR=s.relics&&s.relics.find(r=>r.id===h.assignedRelicId);
+    return `<div class="ph">
+      <div class="ph-head"><span>${h.mash||'—'}${isMage&&h.mageSubtype?' · '+h.mageSubtype:''}</span><span class="ph-hp">${maxHP||'—'} HP</span>${h.knockedOut?'<span class="ph-ko">K.O.</span>':''}</div>
+      <div class="ph-name">${h.name||'Unnamed Hero'}</div>
+      <div class="ph-stats"><span>M ${md.m||'—'}</span><span>A ${md.a||'—'}</span><span>S ${md.s||'—'}</span><span>Armor: ${h.armorType||'None'} (${ar})</span></div>
+      <div class="ph-ability"><strong>${abilityName}:</strong> <em>${abilityText}</em></div>
+      <div class="ph-equip">${h.equip.filter(Boolean).map((e,i)=>`<div>${i+1}. ${e}</div>`).join('')||'<em>No equipment</em>'}</div>
+      ${assignedR?`<div class="ph-relic">✦ ${assignedR.type}${assignedR.props.length?' · '+assignedR.props.join('; '):''}</div>`:''}
+      <div class="ph-track">${(h.dmgBoxes||[]).map(f=>`<span class="pb${f?' pf':''}">&nbsp;</span>`).join('')}</div>
+    </div>`;
+  }
+  const doc=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Apocathon — ${s.wbName||'Warband'}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Special+Elite&family=Crimson+Text:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}body{font-family:'Special Elite',serif;color:#1a1a2e;padding:12mm;font-size:10px;background:white}
+    h1{font-family:'Cinzel',serif;font-size:20px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:2px}
+    .sub{font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:#6b8477;margin-bottom:8px}
+    .wb-meta{display:flex;gap:20px;border-bottom:2px solid #1a1a2e;padding-bottom:8px;margin-bottom:10px}
+    .wb-name{font-family:'Cinzel',serif;font-size:14px;font-weight:600}.wb-deity{font-size:10px;color:#6b8477}
+    .gold{font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:#9b7b2e;margin-left:auto;align-self:center}
+    .notes-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+    .notes-box{border:1px solid #c8bfa8;border-radius:4px;padding:6px 8px;min-height:36px}
+    .notes-label{font-family:'Cinzel',serif;font-size:8px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:#6b8477;margin-bottom:2px}
+    .notes-text{font-family:'Crimson Text',serif;font-size:10px;line-height:1.4}
+    .hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .ph{border:1.5px solid #c8bfa8;border-radius:4px;overflow:hidden;break-inside:avoid}
+    .ph-head{background:#8fa89b;color:white;display:flex;align-items:center;gap:6px;padding:4px 8px;font-family:'Cinzel',serif;font-size:9px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase}
+    .ph-hp{margin-left:auto;background:rgba(255,255,255,0.25);padding:1px 6px;border-radius:3px}
+    .ph-ko{background:#c0392b;padding:1px 5px;border-radius:2px;font-size:8px}
+    .ph-name{font-family:'Cinzel',serif;font-size:12px;font-weight:600;padding:5px 8px 2px;border-bottom:1px solid #c8bfa8}
+    .ph-stats{display:flex;gap:8px;padding:3px 8px;font-size:9px;color:#6b8477;border-bottom:1px solid #c8bfa8}
+    .ph-ability{padding:4px 8px;font-size:9px;border-bottom:1px solid #c8bfa8;font-family:'Crimson Text',serif;line-height:1.35}
+    .ph-equip{padding:4px 8px;font-size:9px;border-bottom:1px solid #c8bfa8;line-height:1.5}
+    .ph-relic{padding:3px 8px;font-family:'Crimson Text',serif;font-style:italic;font-size:9px;color:#9b7b2e;border-bottom:1px solid #c8bfa8}
+    .ph-track{display:flex;gap:2px;padding:4px 8px;flex-wrap:wrap}
+    .pb{display:inline-block;width:9px;height:9px;border-radius:50%;border:1px solid #c8bfa8;background:#e0dbd0}
+    .pf{background:#c0392b;border-color:#c0392b}
+    .footer{margin-top:10px;border-top:1px solid #c8bfa8;padding-top:6px;display:flex;justify-content:space-between;font-size:8px;color:#6b8477}
+    @media print{@page{size:A4;margin:0}body{padding:10mm}}
+  </style></head><body>
+  <h1>APOCATHON</h1><div class="sub">Epic Toy Wargaming — Warband Sheet</div>
+  <div class="wb-meta">
+    <div><div class="wb-name">${s.wbName||'—'}</div><div class="wb-deity">Patron Deity: ${s.wbDeity||'—'}</div></div>
+    <div class="gold">⚜ ${s.gold||0} Gold</div>
+  </div>
+  <div class="notes-row">
+    <div class="notes-box"><div class="notes-label">Notes</div><div class="notes-text">${(s.wbNotes||'').replace(/\n/g,'<br>')}</div></div>
+    <div class="notes-box"><div class="notes-label">Lore</div><div class="notes-text">${(s.wbLore||'').replace(/\n/g,'<br>')}</div></div>
+  </div>
+  <div class="hero-grid">${(s.heroes||[]).map((h,i)=>heroHTML(h,i)).join('')}</div>
+  <div class="footer"><span>Apocathon — Epic Toy Wargaming · Created by Simon Alexander</span><span>${new Date().toLocaleDateString()}</span></div>
+  <script>window.onload=()=>{setTimeout(()=>window.print(),500)};<\/script>
+  </body></html>`;
+  const w=window.open('','_blank');
+  if(!w){showToast('Allow popups to export PDF');return;}
+  w.document.write(doc); w.document.close();
+  showToast('PDF ready — save as PDF in print dialog');
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ── INIT ──
+window.addEventListener('DOMContentLoaded',()=>{
+  try{
+    const saved=localStorage.getItem('apocathon_mobile');
+    if(saved) loadState(JSON.parse(saved));
+    else render();
+  }catch(e){render();}
+});
+</script>
+</body>
+</html>
