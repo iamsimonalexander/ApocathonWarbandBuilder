@@ -1,0 +1,2003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apocathon — Warband Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --sage: #8fa89b;
+    --sage-dark: #6b8477;
+    --sage-light: #c2d0c8;
+    --sage-bg: #b8c9be;
+    --card-bg: #f4f0e8;
+    --card-border: #c8bfa8;
+    --ink: #1a1a2e;
+    --ink-mid: #3a3a50;
+    --ink-soft: #666680;
+    --red-accent: #c0392b;
+    --gold: #9b7b2e;
+    --gold-light: #d4a843;
+    --white: #fefcf5;
+    --dmg-empty: #e0dbd0;
+    --dmg-filled: #c0392b;
+    --radius: 6px;
+    --shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+
+  body {
+    background: var(--sage-bg);
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(0,0,0,0.06) 0%, transparent 50%);
+    min-height: 100vh;
+    font-family: 'Special Elite', 'Courier New', serif;
+    color: var(--ink);
+    padding: 0;
+  }
+
+  /* HEADER */
+  .page-header {
+    background: var(--white);
+    padding: 12px 24px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    border-bottom: 3px solid var(--gold);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .header-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-main {
+    font-family: 'Cinzel', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .logo-sub {
+    font-family: 'Special Elite', serif;
+    font-size: 11px;
+    color: var(--sage-dark);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .header-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    font-family: 'Special Elite', serif;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 3px;
+    cursor: pointer;
+    border: 1.5px solid;
+    transition: all 0.15s;
+  }
+  .btn-ghost {
+    background: transparent;
+    border-color: var(--card-border);
+    color: var(--ink-mid);
+  }
+  .btn-ghost:hover { background: var(--sage-light); border-color: var(--sage-dark); color: var(--ink); }
+  .btn-gold {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--white);
+  }
+  .btn-gold:hover { background: var(--gold-light); border-color: var(--gold-light); }
+  .btn-danger {
+    background: transparent;
+    border-color: rgba(192,57,43,0.5);
+    color: rgba(192,57,43,0.8);
+  }
+  .btn-danger:hover { background: rgba(192,57,43,0.1); border-color: var(--red-accent); color: var(--red-accent); }
+
+  /* MAIN LAYOUT */
+  .page-body {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+  }
+
+  /* WARBAND INFO */
+  .warband-header {
+    background: var(--white);
+    border: 1.5px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .warband-top {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .wb-field-group { flex: 1; min-width: 200px; }
+  .wb-label {
+    font-family: 'Special Elite', serif;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sage-dark);
+    margin-bottom: 4px;
+    display: block;
+  }
+  .wb-input {
+    font-family: 'Special Elite', serif;
+    font-size: 14px;
+    color: var(--ink);
+    background: transparent;
+    border: none;
+    border-bottom: 1.5px solid var(--card-border);
+    padding: 4px 2px;
+    width: 100%;
+    outline: none;
+  }
+  .wb-input:focus { border-bottom-color: var(--gold); }
+  .wb-textarea {
+    font-family: 'Special Elite', serif;
+    font-size: 12px;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--card-border);
+    border-radius: 3px;
+    padding: 6px 8px;
+    width: 100%;
+    height: 70px;
+    resize: vertical;
+    outline: none;
+  }
+  .wb-textarea:focus { border-color: var(--gold); }
+
+  /* SECTION HEADER */
+  .section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    gap: 12px;
+  }
+  .section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 2px;
+    background: var(--gold);
+  }
+  .hero-count-badge {
+    font-family: 'Special Elite', serif;
+    font-size: 10px;
+    background: var(--ink);
+    color: var(--gold-light);
+    padding: 2px 8px;
+    border-radius: 2px;
+    letter-spacing: 0.1em;
+  }
+
+  /* HERO GRID */
+  .hero-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  /* HERO CARD */
+  .hero-card {
+    background: var(--white);
+    border: 1.5px solid var(--card-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    position: relative;
+  }
+  .hero-card.knocked-out {
+    opacity: 0.6;
+    filter: grayscale(0.5);
+  }
+  .hero-card.knocked-out::after {
+    content: 'KNOCKED OUT';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    font-family: 'Cinzel', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: rgba(192,57,43,0.8);
+    letter-spacing: 0.15em;
+    pointer-events: none;
+    border: 3px solid rgba(192,57,43,0.6);
+    padding: 4px 10px;
+    white-space: nowrap;
+  }
+
+  .hero-card-head {
+    background: var(--sage);
+    padding: 8px 12px 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .hero-number {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: rgba(255,255,255,0.7);
+    text-transform: uppercase;
+  }
+  .hero-card-actions {
+    display: flex;
+    gap: 4px;
+  }
+  .icon-btn {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: rgba(255,255,255,0.8);
+    width: 22px;
+    height: 22px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.1s;
+  }
+  .icon-btn:hover { background: rgba(255,255,255,0.25); color: white; }
+  .icon-btn.danger:hover { background: rgba(192,57,43,0.4); border-color: var(--red-accent); }
+
+  .hero-body {
+    padding: 10px 12px 8px;
+  }
+
+  /* Name + MASH row */
+  .hero-identity {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+  .hero-name-block { flex: 1; }
+  .hero-hp-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+  .field-label {
+    font-family: 'Special Elite', serif;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sage-dark);
+    display: block;
+    margin-bottom: 2px;
+  }
+  .field-input {
+    font-family: 'Special Elite', serif;
+    font-size: 13px;
+    color: var(--ink);
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--card-border);
+    padding: 2px 2px;
+    width: 100%;
+    outline: none;
+  }
+  .field-input:focus { border-bottom-color: var(--gold); }
+  .field-select {
+    font-family: 'Special Elite', serif;
+    font-size: 12px;
+    color: var(--ink);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 3px;
+    padding: 3px 6px;
+    width: 100%;
+    outline: none;
+    cursor: pointer;
+  }
+  .field-select:focus { border-color: var(--gold); }
+  .hp-display {
+    width: 48px;
+    height: 48px;
+    border: 2.5px solid var(--ink);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--white);
+    cursor: pointer;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+
+  .hp-current {
+    font-family: 'Cinzel', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .hp-max {
+    font-family: 'Special Elite', serif;
+    font-size: 8px;
+    color: var(--sage-dark);
+  }
+
+  /* MASH stats */
+  .mash-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .mash-stat {
+    background: rgba(143,168,155,0.12);
+    border: 1px solid var(--card-border);
+    border-radius: 4px;
+    padding: 5px 4px 4px;
+    text-align: center;
+  }
+  .mash-val {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .mash-val.neg { color: var(--red-accent); }
+  .mash-key {
+    font-family: 'Special Elite', serif;
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sage-dark);
+    margin-top: 1px;
+  }
+
+  /* Armor row */
+  .armor-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    align-items: flex-end;
+  }
+  .armor-block { flex: 1; }
+  .armor-save {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gold);
+    background: rgba(155,123,46,0.1);
+    border: 1px solid rgba(155,123,46,0.3);
+    border-radius: 4px;
+    padding: 4px 8px;
+    text-align: center;
+    min-width: 54px;
+    white-space: nowrap;
+  }
+
+  /* Ability */
+  .ability-section {
+    background: rgba(143,168,155,0.1);
+    border: 1px solid var(--card-border);
+    border-radius: 4px;
+    padding: 6px 8px;
+    margin-bottom: 8px;
+  }
+  .ability-name {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--ink);
+    margin-bottom: 2px;
+    text-transform: uppercase;
+  }
+  .ability-text {
+    font-family: 'Crimson Text', serif;
+    font-style: italic;
+    font-size: 11px;
+    color: var(--ink-mid);
+    line-height: 1.4;
+  }
+
+  /* Equipment */
+  .equip-section { margin-bottom: 8px; }
+  .equip-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+  }
+  .equip-slot {
+    border: 1px dashed var(--card-border);
+    border-radius: 3px;
+    padding: 4px 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 30px;
+  }
+  .equip-slot-num {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--sage-dark);
+    flex-shrink: 0;
+    width: 12px;
+  }
+  .equip-select {
+    font-family: 'Special Elite', serif;
+    font-size: 10px;
+    color: var(--ink);
+    background: transparent;
+    border: none;
+    outline: none;
+    width: 100%;
+    padding: 0;
+    cursor: pointer;
+    appearance: auto;
+  }
+  .equip-select:focus { color: var(--gold); }
+  .equip-custom-input {
+    font-family: 'Special Elite', serif;
+    font-size: 10px;
+    color: var(--ink);
+    background: transparent;
+    border: none;
+    outline: none;
+    width: 100%;
+    padding: 0;
+    min-width: 0;
+  }
+  .equip-custom-input::placeholder { color: var(--sage-light); font-style: italic; }
+  .equip-custom-input:focus { color: var(--gold); }
+  .equip-back-btn {
+    font-size: 11px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--sage-dark);
+    padding: 0 2px;
+    flex-shrink: 0;
+    line-height: 1;
+    transition: color 0.1s;
+  }
+  .equip-back-btn:hover { color: var(--ink); }
+  .equip-slot.large-item {
+    grid-column: 1 / -1;
+    border-color: rgba(155,123,46,0.4);
+    background: rgba(155,123,46,0.04);
+  }
+
+  /* Damage track */
+  .damage-track {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .track-label {
+    font-family: 'Special Elite', serif;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sage-dark);
+    flex-shrink: 0;
+  }
+  .track-boxes {
+    display: flex;
+    gap: 3px;
+    flex-wrap: wrap;
+  }
+  .dmg-box {
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    border: 1.5px solid var(--card-border);
+    background: var(--dmg-empty);
+    cursor: pointer;
+    transition: all 0.1s;
+    flex-shrink: 0;
+  }
+  .dmg-box.filled { background: var(--dmg-filled); border-color: var(--dmg-filled); }
+  .dmg-box:hover { border-color: var(--red-accent); }
+
+  /* RELIC POOL CARDS */
+  .relic-card {
+    background: var(--white);
+    border: 1.5px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 8px 10px;
+    min-width: 180px;
+    max-width: 240px;
+    box-shadow: var(--shadow);
+    flex: 1 1 180px;
+  }
+  .relic-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .relic-delete-btn {
+    background: transparent;
+    border: 1px solid rgba(192,57,43,0.25);
+    border-radius: 3px;
+    color: rgba(192,57,43,0.5);
+    font-size: 11px;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.1s;
+    flex-shrink: 0;
+  }
+  .relic-delete-btn:hover {
+    background: rgba(192,57,43,0.08);
+    border-color: var(--red-accent);
+    color: var(--red-accent);
+  }
+  .relic-type-badge {
+    font-family: 'Cinzel', serif;
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: var(--gold);
+    color: var(--white);
+    padding: 2px 7px;
+    border-radius: 2px;
+  }
+  .relic-type-badge.mundane {
+    background: var(--sage);
+    color: var(--white);
+  }
+  .relic-card-type {
+    font-family: 'Special Elite', serif;
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--ink);
+    margin-bottom: 1px;
+  }
+  .relic-card-slots {
+    font-family: 'Special Elite', serif;
+    font-size: 9px;
+    color: var(--sage-dark);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+  .relic-prop-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 5px;
+    border-top: 1px solid var(--card-border);
+    padding-top: 4px;
+  }
+  .relic-prop-list li {
+    font-family: 'Crimson Text', serif;
+    font-style: italic;
+    font-size: 10px;
+    color: var(--gold);
+    line-height: 1.4;
+    padding-left: 8px;
+    position: relative;
+  }
+  .relic-prop-list li::before {
+    content: '✦';
+    position: absolute;
+    left: 0;
+    font-size: 7px;
+    top: 2px;
+  }
+  .relic-no-props {
+    font-family: 'Special Elite', serif;
+    font-size: 9px;
+    color: var(--sage-dark);
+    font-style: italic;
+    border-top: 1px solid var(--card-border);
+    padding-top: 4px;
+    margin-bottom: 4px;
+  }
+  .relic-assigned {
+    font-family: 'Special Elite', serif;
+    font-size: 9px;
+    color: var(--ink-soft);
+    border-top: 1px solid var(--card-border);
+    padding-top: 4px;
+    margin-top: 4px;
+  }
+  .relic-assigned strong { color: var(--ink); }
+    margin-bottom: 8px;
+  }
+  .relic-note-input {
+    font-family: 'Special Elite', serif;
+    font-size: 10px;
+    color: var(--ink);
+    background: transparent;
+    border: none;
+    border-bottom: 1px dashed var(--card-border);
+    padding: 2px 2px;
+    width: 100%;
+    outline: none;
+  }
+  .relic-note-input:focus { border-bottom-color: var(--gold); }
+
+  /* ADD HERO */
+  .add-hero-btn {
+    background: transparent;
+    border: 2px dashed var(--sage);
+    border-radius: var(--radius);
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Special Elite', serif;
+    font-size: 13px;
+    color: var(--sage-dark);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .add-hero-btn:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: rgba(155,123,46,0.04);
+  }
+  .add-hero-btn span { display: block; font-size: 22px; margin-bottom: 4px; opacity: 0.6; }
+
+  .reset-btn {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    background: transparent;
+    border: 1.5px solid rgba(192,57,43,0.3);
+    border-radius: var(--radius);
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Special Elite', serif;
+    font-size: 12px;
+    color: rgba(192,57,43,0.6);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .reset-btn:hover {
+    border-color: var(--red-accent);
+    color: var(--red-accent);
+    background: rgba(192,57,43,0.04);
+  }
+
+  /* PORTRAIT BOX */
+  .portrait-box {
+    width: 56px;
+    height: 64px;
+    border: 1.5px dashed var(--card-border);
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 20px;
+    background: rgba(143,168,155,0.08);
+    color: var(--sage-light);
+    font-family: 'Special Elite', serif;
+    cursor: pointer;
+    overflow: hidden;
+    position: relative;
+  }
+  .portrait-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 2px;
+  }
+  .portrait-box:hover { border-color: var(--gold); }
+  .portrait-hint {
+    font-size: 7px;
+    text-align: center;
+    color: var(--sage-light);
+    line-height: 1.3;
+  }
+
+  /* QUICK REF PANEL */
+  .quick-ref {
+    background: var(--white);
+    border: 1.5px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+  .qr-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+  }
+  .qr-toggle-icon {
+    font-size: 13px;
+    color: var(--sage-dark);
+    transition: transform 0.2s;
+  }
+  .quick-ref.open .qr-toggle-icon { transform: rotate(180deg); }
+  .qr-body { display: none; margin-top: 12px; }
+  .quick-ref.open .qr-body { display: block; }
+  .qr-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 8px;
+  }
+  .qr-table { width: 100%; border-collapse: collapse; font-size: 10px; }
+  .qr-table th {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--sage-dark);
+    text-align: left;
+    border-bottom: 1px solid var(--card-border);
+    padding: 3px 4px;
+    text-transform: uppercase;
+  }
+  .qr-table td {
+    font-family: 'Special Elite', serif;
+    font-size: 10px;
+    padding: 2px 4px;
+    border-bottom: 1px solid rgba(200,191,168,0.4);
+    vertical-align: top;
+  }
+  .qr-table td:first-child { font-weight: bold; color: var(--ink); }
+  .qr-table td:not(:first-child) { color: var(--ink-mid); }
+  .qr-section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  /* GOLD TRACKER */
+  .gold-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .gold-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(155,123,46,0.1);
+    border: 1.5px solid rgba(155,123,46,0.3);
+    border-radius: 4px;
+    padding: 6px 14px;
+  }
+  .gold-icon { font-size: 16px; }
+  .gold-label { font-family: 'Special Elite', serif; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); }
+  .gold-val {
+    font-family: 'Cinzel', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gold);
+  }
+  .gold-input {
+    font-family: 'Cinzel', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gold);
+    background: transparent;
+    border: none;
+    outline: none;
+    width: 60px;
+    text-align: center;
+  }
+  .gold-btns { display: flex; gap: 4px; }
+  .gold-btn {
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    font-weight: 600;
+    width: 28px;
+    height: 28px;
+    border-radius: 3px;
+    border: 1.5px solid rgba(155,123,46,0.4);
+    background: transparent;
+    color: var(--gold);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.1s;
+  }
+  .gold-btn:hover { background: rgba(155,123,46,0.15); }
+
+  /* PRINT */
+  @media print {
+    .page-header, .header-actions, .hero-card-actions, .add-hero-btn,
+    .quick-ref, .icon-btn, .btn, .gold-btns { display: none !important; }
+    body { background: white; }
+    .page-body { padding: 10px; max-width: 100%; }
+    .hero-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .hero-card { break-inside: avoid; }
+    .warband-header { break-inside: avoid; }
+    .field-input, .field-select, .equip-select, .wb-input, .wb-textarea, .relic-note-input {
+      border-color: #ccc !important;
+    }
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: var(--ink);
+    color: white;
+    font-family: 'Special Elite', serif;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    padding: 10px 20px;
+    border-radius: 4px;
+    transition: transform 0.25s;
+    pointer-events: none;
+    z-index: 999;
+    border-top: 2px solid var(--gold);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* CAMPAIGN SECTION */
+  .campaign-section {
+    background: var(--white);
+    border: 1.5px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+  .campaign-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 12px;
+  }
+  @media (max-width: 540px) {
+    .campaign-grid { grid-template-columns: 1fr; }
+    .warband-top { flex-direction: column; }
+  }
+
+
+
+  /* Mage subtype */
+  .mage-subtype-row {
+    display: none;
+    margin-bottom: 8px;
+  }
+  .mage-subtype-row.visible { display: block; }
+
+  /* Responsive collapse */
+  @media (max-width: 640px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .mash-row { grid-template-columns: repeat(3, 1fr); }
+    .equip-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="header-logo">
+    <span class="logo-main">Apocathon</span>
+    <span class="logo-sub">Warband Builder</span>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-ghost" onclick="clearAll()">↺ Clear All</button>
+    <button class="btn btn-ghost" onclick="saveToFile()">⬇ Export PDF</button>
+    <button class="btn btn-ghost" onclick="loadFromFile()">⬆ Import</button>
+    <button class="btn btn-gold" onclick="printSheet()">⎙ Print</button>
+  </div>
+</div>
+
+<div class="page-body">
+
+  <!-- WARBAND INFO -->
+  <div class="warband-header">
+    <div class="warband-top">
+      <div class="wb-field-group" style="flex:2">
+        <label class="wb-label">Warband Name</label>
+        <input class="wb-input" id="warbandName" placeholder="Name your warband..." type="text" oninput="autosave()">
+      </div>
+      <div class="wb-field-group">
+        <label class="wb-label">Patron Deity</label>
+        <input class="wb-input" id="patronDeity" placeholder="The god who leads you..." type="text" oninput="autosave()">
+      </div>
+      <div class="gold-display">
+        <span class="gold-icon">⚜</span>
+        <div>
+          <div class="gold-label">Gold</div>
+          <input class="gold-input" id="goldAmount" type="number" value="0" min="0" oninput="autosave()">
+        </div>
+        <div class="gold-btns">
+          <button class="gold-btn" onclick="adjustGold(-1)">−</button>
+          <button class="gold-btn" onclick="adjustGold(1)">+</button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <label class="wb-label">Notes</label>
+      <textarea class="wb-textarea" id="warbandNotes" placeholder="Battle notes, tactics, campaign events..." oninput="autosave()"></textarea>
+    </div>
+    <div>
+      <label class="wb-label">Lore</label>
+      <textarea class="wb-textarea" id="warbandLore" placeholder="The story of your warband..." oninput="autosave()"></textarea>
+    </div>
+  </div>
+
+  <!-- QUICK REFERENCE -->
+  <div class="quick-ref" id="quickRef">
+    <div class="qr-toggle" onclick="toggleQR()">
+      <span class="section-title">Quick Reference</span>
+      <span class="qr-toggle-icon">▼</span>
+    </div>
+    <div class="qr-body">
+      <div class="qr-grid">
+        <div>
+          <div class="qr-section-title">Heroes — MASH Stats</div>
+          <table class="qr-table">
+            <tr><th>Class</th><th>M</th><th>A</th><th>S</th><th>HP</th></tr>
+            <tr><td>Ranger</td><td>+2</td><td>+3</td><td>+1</td><td>6</td></tr>
+            <tr><td>Berserker</td><td>+3</td><td>+1</td><td>+2</td><td>8</td></tr>
+            <tr><td>Healer</td><td>+2</td><td>+1</td><td>+3</td><td>6</td></tr>
+            <tr><td>Knight</td><td>+2</td><td>+2</td><td>+1</td><td>8</td></tr>
+            <tr><td>Creature</td><td>+3</td><td>+1</td><td>+2</td><td>6</td></tr>
+            <tr><td>Soldier</td><td>+3</td><td>+2</td><td>+1</td><td>8</td></tr>
+            <tr><td>Rogue</td><td>+2</td><td>+3</td><td>+1</td><td>6</td></tr>
+            <tr><td>Mage</td><td>+1</td><td>+2</td><td>+3</td><td>6</td></tr>
+          </table>
+        </div>
+        <div>
+          <div class="qr-section-title">Armor Saves</div>
+          <table class="qr-table">
+            <tr><th>Armor</th><th>Save</th><th>Cost</th></tr>
+            <tr><td>None</td><td>—</td><td>Free</td></tr>
+            <tr><td>Light</td><td>5+</td><td>2g</td></tr>
+            <tr><td>Medium</td><td>4+</td><td>6g</td></tr>
+            <tr><td>Heavy</td><td>3+</td><td>10g</td></tr>
+            <tr><td>Shield</td><td>+1 / 6+</td><td>5g</td></tr>
+          </table>
+          <div style="height:8px"></div>
+          <div class="qr-section-title">To Hit</div>
+          <table class="qr-table">
+            <tr><td>Roll 2d6 + MASH ≥ 9 to hit</td></tr>
+            <tr><td>Half cover: −2 to roll</td></tr>
+            <tr><td>Disengage: enemy free attack</td></tr>
+          </table>
+        </div>
+        <div>
+          <div class="qr-section-title">Weapons</div>
+          <table class="qr-table">
+            <tr><th>Weapon</th><th>Bonus</th><th>Dmg</th><th>Cost</th></tr>
+            <tr><td>Sm. Blunt</td><td>M/A</td><td>1</td><td>2g</td></tr>
+            <tr><td>Sm. Sharp</td><td>A</td><td>1</td><td>2g</td></tr>
+            <tr><td>Md. Blunt</td><td>M</td><td>2</td><td>4g</td></tr>
+            <tr><td>Md. Sharp</td><td>M/A</td><td>2</td><td>4g</td></tr>
+            <tr><td>Lg. Blunt</td><td>M</td><td>3</td><td>6g</td></tr>
+            <tr><td>Lg. Sharp</td><td>M</td><td>3</td><td>6g</td></tr>
+            <tr><td>Trad. Ranged</td><td>A</td><td>3</td><td>6g</td></tr>
+            <tr><td>Mech. Ranged</td><td>A</td><td>4</td><td>8g</td></tr>
+            <tr><td>Sm. Firearm</td><td>A</td><td>4</td><td>8g</td></tr>
+            <tr><td>Lg. Firearm</td><td>A</td><td>5</td><td>10g</td></tr>
+            <tr><td>Sm. Magic</td><td>S</td><td>2</td><td>4g</td></tr>
+            <tr><td>Md. Magic</td><td>S</td><td>3</td><td>6g</td></tr>
+            <tr><td>Lg. Magic</td><td>S</td><td>4</td><td>8g</td></tr>
+          </table>
+        </div>
+        <div>
+          <div class="qr-section-title">Abilities</div>
+          <table class="qr-table">
+            <tr><th>MASH</th><th>Ability</th></tr>
+            <tr><td>Ranger</td><td>Sharpshooter: ignore cover penalty</td></tr>
+            <tr><td>Berserker</td><td>Rage: free attack on K.O.</td></tr>
+            <tr><td>Healer</td><td>Healing: 1d6+Soul to nearby ally</td></tr>
+            <tr><td>Knight</td><td>Steadfast: survive 1st K.O. at 1 HP</td></tr>
+            <tr><td>Creature</td><td>Frenzy: extra order at ≤3 HP</td></tr>
+            <tr><td>Soldier</td><td>Veteran: no free attacks on disengage</td></tr>
+            <tr><td>Rogue</td><td>Cat Burglar: vertical move free</td></tr>
+            <tr><td>Mage</td><td>Subtype ability (2 Orders)</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAGIC RELICS -->
+  <div class="section-head">
+    <span class="section-title">Magic Relics</span>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost" onclick="generateAndAddRelic(false)">✦ Generate Relic</button>
+      <button class="btn btn-ghost" onclick="generateAndAddRelic(true)">⬡ Generate Mundane</button>
+    </div>
+  </div>
+
+  <div id="relicPool" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;"></div>
+
+  <!-- HEROES -->
+  <div class="section-head">
+    <span class="section-title">Warband Heroes</span>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <span class="hero-count-badge" id="heroCountBadge">0 / 6</span>
+      <button class="btn btn-gold" onclick="generateWarband()">⚄ Random Warband</button>
+    </div>
+  </div>
+
+  <div class="hero-grid" id="heroGrid"></div>
+
+  <button class="add-hero-btn" id="addHeroBtn" onclick="addHero()">
+    <span>⚔</span>
+    Recruit a Hero
+  </button>
+
+  <button class="reset-btn" onclick="clearAll()">
+    ↺ Reset Everything
+  </button>
+
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="fileInput" accept=".json" style="display:none" onchange="handleFileLoad(event)">
+
+<script>
+// === DATA ===
+const EQUIP_OPTIONS = [
+  { value:'', label:'— empty slot —' },
+  // Melee weapons
+  { divider:true, label:'── Melee Weapons ──' },
+  { value:'Small Blunt (Might/Acc, 1 dmg)', label:'Small Blunt  ·  M/A  ·  1 dmg' },
+  { value:'Small Sharp (Acc, 1 dmg)', label:'Small Sharp  ·  Acc  ·  1 dmg' },
+  { value:'Medium Blunt (Might, 2 dmg)', label:'Medium Blunt  ·  Might  ·  2 dmg' },
+  { value:'Medium Sharp (Might/Acc, 2 dmg)', label:'Medium Sharp  ·  M/A  ·  2 dmg' },
+  { value:'Large Blunt (Might, 3 dmg) [2 slots]', label:'Large Blunt  ·  Might  ·  3 dmg  [2 slots]' },
+  { value:'Large Sharp (Might, 3 dmg) [2 slots]', label:'Large Sharp  ·  Might  ·  3 dmg  [2 slots]' },
+  // Ranged weapons
+  { divider:true, label:'── Ranged Weapons ──' },
+  { value:'Traditional Ranged (Acc, 3 dmg)', label:'Traditional Ranged  ·  Acc  ·  3 dmg' },
+  { value:'Mechanical Ranged (Acc, 4 dmg)', label:'Mechanical Ranged  ·  Acc  ·  4 dmg' },
+  { value:'Small Firearm (Acc, 4 dmg)', label:'Small Firearm  ·  Acc  ·  4 dmg' },
+  { value:'Large Firearm (Acc, 5 dmg) [2 slots]', label:'Large Firearm  ·  Acc  ·  5 dmg  [2 slots]' },
+  // Magic weapons
+  { divider:true, label:'── Magic Weapons ──' },
+  { value:'Small Magic (Soul, 2 dmg)', label:'Small Magic  ·  Soul  ·  2 dmg' },
+  { value:'Medium Magic (Soul, 3 dmg)', label:'Medium Magic  ·  Soul  ·  3 dmg' },
+  { value:'Large Magic (Soul, 4 dmg) [2 slots]', label:'Large Magic  ·  Soul  ·  4 dmg  [2 slots]' },
+  // Armor
+  { divider:true, label:'── Armor ──' },
+  { value:'Light Armor (save 5+)', label:'Light Armor  ·  Save 5+' },
+  { value:'Medium Armor (save 4+) [2 slots]', label:'Medium Armor  ·  Save 4+  [2 slots]' },
+  { value:'Heavy Armor (save 3+) [2 slots]', label:'Heavy Armor  ·  Save 3+  [2 slots]' },
+  { value:'Shield (+1 save / 6+ if no armor)', label:'Shield  ·  +1 Save / 6+ if no armor' },
+  // Special items
+  { divider:true, label:'── Special Items ──' },
+  { value:'Revive Potion (revive K.O. ally to full HP)', label:'Revive Potion  ·  Revive K.O. ally to full HP' },
+  { value:'Explosive (5 dmg in 4" of target point)', label:'Explosive  ·  5 dmg in 4" radius' },
+  { value:'Healing Potion (regain 1d6 HP)', label:'Healing Potion  ·  Regain 1d6 HP' },
+  { value:"Summoner's Stone (place terrain object within 12\")", label:"Summoner's Stone  ·  Place object within 12\"" },
+  { value:'Mundane Relic (see Magic Relics)', label:'Mundane Relic  ·  See Magic Relics' },
+  { value:'Magic Relic (see Magic Relics) [2 slots]', label:'Magic Relic  ·  See Magic Relics  [2 slots]' },
+  { divider:true, label:'── Custom ──' },
+  { value:'__custom__', label:'Custom...' },
+];
+
+const MASH = {
+  Ranger:    { m:'+2', a:'+3', s:'+1', hp:6,  ability:'Sharpshooter', abilityText:'Shooting at a model in cover does not cause you to take a −2 penalty to the attack roll.' },
+  Berserker: { m:'+3', a:'+1', s:'+2', hp:8,  ability:'Rage', abilityText:'When you knock out a model, you may immediately take another free attack order.' },
+  Healer:    { m:'+2', a:'+1', s:'+3', hp:6,  ability:'Healing', abilityText:'Roll 1d6 and add your Soul. A model within 1" of you regains that much Health. Can be used on yourself.' },
+  Knight:    { m:'+2', a:'+2', s:'+1', hp:8,  ability:'Steadfast', abilityText:'When you are knocked out for the first time each battle, you may instead go to 1 Health.' },
+  Creature:  { m:'+3', a:'+1', s:'+2', hp:6,  ability:'Frenzy', abilityText:'When you have 3 or less Health, you may take an extra order each time you are led.' },
+  Soldier:   { m:'+3', a:'+2', s:'+1', hp:8,  ability:'Veteran', abilityText:'When you move out of 1" from a model, that model does not make a free attack on you.' },
+  Rogue:     { m:'+2', a:'+3', s:'+1', hp:6,  ability:'Cat Burglar', abilityText:'Moving vertically does not expend Move distance.' },
+  Mage:      { m:'+1', a:'+2', s:'+3', hp:6,  ability:'Mage Subtype', abilityText:'Choose a subtype below.' },
+};
+const MAGE_SUBTYPES = {
+  Druid:       { ability:'Druid', abilityText:'For 2 Orders, summon a Beast within 4" of you.' },
+  Necromancer: { ability:'Necromancer', abilityText:'For 2 Orders, summon an Undead within 4" of you under your control.' },
+  Enchanter:   { ability:'Enchanter', abilityText:'For 2 Orders, control the target during their next activation.' },
+  'War Mage':  { ability:'War Mage', abilityText:'Magic weapons you use deal +2 damage.' },
+};
+const ARMOR_SAVES = {
+  'None':'—','Light':'5+','Medium':'4+','Heavy':'3+','Shield':'+1 / 6+'
+};
+
+// === MAGIC RELIC GENERATOR DATA ===
+const RELIC_PROPERTIES = {
+  11:'Rangerbane (×2 Dmg to Rangers; ½ dmg from Rangers)',
+  12:'Roguebane (×2 Dmg to Rogues; ½ dmg from Rogues)',
+  13:'Knightbane (×2 Dmg to Knights; ½ dmg from Knights)',
+  14:'Soldierbane (×2 Dmg to Soldiers; ½ dmg from Soldiers)',
+  15:'Magebane (×2 Dmg to Mages; ½ dmg from Mages)',
+  16:'Healerbane (×2 Dmg to Healers; ½ dmg from Healers)',
+  21:'Creaturebane (×2 Dmg to Creatures; ½ dmg from Creatures)',
+  22:'Berserkerbane (×2 Dmg to Berserkers; ½ dmg from Berserkers)',
+  23:'Undeadbane (×2 Dmg to Undead; ½ dmg from Goblinoids)',
+  24:'Goblinoidbane (×2 Dmg to Goblinoids; ½ dmg from Rangers)',
+  25:'Dragonbane (×2 Dmg to Dragons; ½ dmg from Dragons)',
+  26:'Leaderbane (×2 Dmg to Leaders; ½ dmg from Leaders)',
+  31:'Frost Rune (Damaged target can\'t move next turn; attacker can\'t move next turn)',
+  32:'Flame Rune (+2 Damage; +1 to Save)',
+  33:'Blood Rune (+1 to Hit; +1 to Save)',
+  34:'Strength Rune (+1 to Might)',
+  35:'Eye Rune (+1 to Accuracy)',
+  36:'Spirit Rune (+1 to Soul)',
+  41:'Stealth Shadow (Always Hidden from Line of Sight except in Melee)',
+  42:'Wings of Flight (Ignore vertical distance for movement)',
+  43:'Watersign (Move normally on/in water)',
+  44:'Blinkwalk (Teleport 9″ in any direction for 1 Order)',
+  45:'Rescuemark (Teleport to any friendly model for 2 Orders)',
+  46:'Wallwalk (Move through objects without counting Move distance)',
+  51:'Necromantic (Summon 1 Undead for 2 Orders)',
+  52:'Druidic (Summon 1 Beast for 2 Orders)',
+  53:'Hordecaller (Summon 1 Goblinoid for 2 Orders)',
+  54:'Roughrider (Summon a Mount for 2 Orders)',
+  55:'Hypnotic (−2 to Hit against you)',
+  56:'Vampiron (Enemy K.O.\'d by you becomes an Undead ally)',
+  61:'Terrifying (For 2 Orders, one visible model must move 9″ away)',
+  62:'Spellhatred (Immune to damage from Magical weapons)',
+  63:'Forcefield (Immune to damage from Ranged weapons)',
+  64:'Vorpal (+2 to Hit; +2 to Save)',
+  65:'Lightningfire (×2 Attacks or ×2 Moves for one Order)',
+  66:'Phoenixtouch (For 2 Orders, revive a K.O.\'d model you can see)',
+};
+
+function d6(){ return Math.floor(Math.random()*6)+1; }
+
+function generateRelic(mundane) {
+  const typeRoll = d6();
+  let type, subtype='', slots=1;
+  if(typeRoll===1){
+    const sz=['Small','Medium','Large'][d6()<=2?0:d6()<=4?1:2];
+    const sharp=d6()<=3;
+    type=`${sz} ${sharp?'Sharp':'Blunt'} Melee Weapon`;
+    if(sz==='Large') slots=2;
+  } else if(typeRoll===2){
+    type='Medium Melee Weapon — '+(d6()<=3?'Sharp':'Blunt');
+  } else if(typeRoll===3){
+    type='Large Melee Weapon — '+(d6()<=3?'Sharp':'Blunt');
+    slots=2;
+  } else if(typeRoll===4){
+    const r=d6();
+    if(r<=2) subtype='Traditional Ranged';
+    else if(r<=4) subtype='Mechanical Ranged';
+    else { subtype=(d6()<=3?'Small':'Large')+' Firearm'; if(subtype.startsWith('Large')) slots=2; }
+    type=subtype+' (Ranged Weapon)';
+  } else if(typeRoll===5){
+    const ar=d6();
+    if(ar===1) type='Light Armor';
+    else if(ar<=3) type='Medium Armor';
+    else if(ar<=5) type='Heavy Armor';
+    else type='Shield';
+    slots=2;
+  } else {
+    const sz=['Small','Medium','Large'][d6()<=2?0:d6()<=4?1:2];
+    type=`${sz} Magic Weapon`;
+    if(sz==='Large') slots=2;
+  }
+
+  const props=[];
+  if(!mundane){
+    const numProps=d6()<=2?1:d6()<=4?2:3;
+    for(let i=0;i<numProps;i++){
+      const key=d6()*10+d6();
+      props.push(RELIC_PROPERTIES[key]||RELIC_PROPERTIES[11]);
+    }
+  }
+
+  return { id: Date.now()+Math.random(), type, slots, props, mundane, assignedTo:null };
+}
+
+let relics = [];
+let nextRelicId = 0;
+
+let heroes = [];
+let nextId = 0;
+
+function defaultHero() {
+  return {
+    id: nextId++,
+    name: '',
+    mash: '',
+    mageSubtype: '',
+    armorType: 'None',
+    currentHP: 0,
+    maxHP: 0,
+    equip: ['','','',''],
+    equipCustom: [false,false,false,false],
+    relicNote: '',
+    assignedRelicId: null,
+    dmgBoxes: Array(16).fill(false),
+    knockedOut: false,
+  };
+}
+
+// === RENDER ===
+function renderRelics() {
+  const pool = document.getElementById('relicPool');
+  if(!pool) return;
+  if(relics.length===0){
+    pool.innerHTML = '<span style="font-family:\'Special Elite\',serif;font-size:11px;color:var(--sage-dark);letter-spacing:0.08em;">No relics generated yet — roll the dice!</span>';
+    return;
+  }
+  pool.innerHTML = relics.map(r=>{
+    const assignee = heroes.find(h=>h.assignedRelicId===r.id);
+    return `<div class="relic-card">
+      <div class="relic-card-head">
+        <span class="relic-type-badge ${r.mundane?'mundane':''}">${r.mundane?'Mundane':'Magic'}</span>
+        <button class="relic-delete-btn" onclick="removeRelic('${r.id}')" title="Discard relic">🗑</button>
+      </div>
+      <div class="relic-card-type">${r.type}</div>
+      <div class="relic-card-slots">${r.slots} slot${r.slots>1?'s':''}</div>
+      ${r.props.length?`<ul class="relic-prop-list">${r.props.map(p=>`<li>${p}</li>`).join('')}</ul>`:'<div class="relic-no-props">No magical properties</div>'}
+      <div class="relic-assigned">${assignee?`✦ Assigned to <strong>${assignee.name||'Hero '+(heroes.indexOf(assignee)+1)}</strong>`:'Unassigned'}</div>
+    </div>`;
+  }).join('');
+}
+
+function render() {
+  const grid = document.getElementById('heroGrid');
+  grid.innerHTML = '';
+  heroes.forEach((h, idx) => {
+    grid.appendChild(buildHeroCard(h, idx));
+  });
+  document.getElementById('heroCountBadge').textContent = heroes.length + ' / 6';
+  const addBtn = document.getElementById('addHeroBtn');
+  addBtn.style.display = heroes.length >= 6 ? 'none' : 'block';
+  renderRelics();
+}
+
+function buildHeroCard(h, idx) {
+  const card = document.createElement('div');
+  card.className = 'hero-card' + (h.knockedOut ? ' knocked-out' : '');
+  card.id = 'hero-card-' + h.id;
+
+  const mashData = MASH[h.mash] || {};
+  const isMage = h.mash === 'Mage';
+  const subtypeData = isMage && h.mageSubtype ? MAGE_SUBTYPES[h.mageSubtype] : null;
+  const abilityName = subtypeData ? subtypeData.ability : (mashData.ability || '—');
+  const abilityText = subtypeData ? subtypeData.abilityText : (mashData.abilityText || 'Select a class to see ability.');
+  const armorSave = ARMOR_SAVES[h.armorType] || '—';
+
+  // count filled dmg boxes
+  const filledDmg = h.dmgBoxes.filter(Boolean).length;
+  const maxHP = mashData.hp || h.maxHP || 8;
+
+  card.innerHTML = `
+    <div class="hero-card-head">
+      <span class="hero-number">Hero ${idx+1}</span>
+      <div class="hero-card-actions">
+        <button class="icon-btn" title="Move Up" onclick="moveHero(${h.id},-1)">↑</button>
+        <button class="icon-btn" title="Move Down" onclick="moveHero(${h.id},1)">↓</button>
+        <button class="icon-btn" title="${h.knockedOut ? 'Restore' : 'Knock Out'}" onclick="toggleKO(${h.id})">${h.knockedOut ? '↩' : '✕'}</button>
+        <button class="icon-btn danger" title="Remove Hero" onclick="removeHero(${h.id})">🗑</button>
+      </div>
+    </div>
+    <div class="hero-body">
+      <div class="hero-identity">
+        <div class="portrait-box" onclick="uploadPortrait(${h.id})" title="Click to add portrait" id="portrait-${h.id}">
+          ${h.portrait ? `<img src="${h.portrait}" alt="portrait">` : `<div class="portrait-hint">tap<br>portrait</div>`}
+        </div>
+        <div style="flex:1">
+          <label class="field-label">Name</label>
+          <input class="field-input" placeholder="Hero name..." value="${esc(h.name)}"
+            oninput="updateField(${h.id},'name',this.value)">
+          <div style="height:6px"></div>
+          <label class="field-label">MASH</label>
+          <select class="field-select" onchange="updateMash(${h.id},this.value)">
+            <option value="">— Select MASH —</option>
+            ${Object.keys(MASH).map(k=>`<option value="${k}" ${h.mash===k?'selected':''}>${k}</option>`).join('')}
+          </select>
+        </div>
+        <div class="hero-hp-block">
+          <div class="hp-display" style="cursor:default;" title="Max Health for this MASH">
+            <div class="hp-current">${maxHP || '—'}</div>
+            <div class="hp-max">HP</div>
+          </div>
+        </div>
+      </div>
+
+      ${isMage ? `
+      <div class="mage-subtype-row visible">
+        <label class="field-label">Mage Subtype</label>
+        <select class="field-select" onchange="updateField(${h.id},'mageSubtype',this.value);render();autosave()">
+          <option value="">— Choose path —</option>
+          ${Object.keys(MAGE_SUBTYPES).map(k=>`<option value="${k}" ${h.mageSubtype===k?'selected':''}>${k}</option>`).join('')}
+        </select>
+      </div>` : ''}
+
+      <div class="mash-row">
+        <div class="mash-stat">
+          <div class="mash-val">${mashData.m || '—'}</div>
+          <div class="mash-key">Might</div>
+        </div>
+        <div class="mash-stat">
+          <div class="mash-val ${mashData.a === '−3' ? 'neg' : ''}">${mashData.a || '—'}</div>
+          <div class="mash-key">Accuracy</div>
+        </div>
+        <div class="mash-stat">
+          <div class="mash-val">${mashData.s || '—'}</div>
+          <div class="mash-key">Soul</div>
+        </div>
+      </div>
+
+      <div class="armor-row">
+        <div class="armor-block">
+          <label class="field-label">Armor</label>
+          <select class="field-select" onchange="updateField(${h.id},'armorType',this.value);render();autosave()">
+            ${Object.keys(ARMOR_SAVES).map(k=>`<option value="${k}" ${h.armorType===k?'selected':''}>${k}</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Save</label>
+          <div class="armor-save">${armorSave}</div>
+        </div>
+      </div>
+
+      <div class="ability-section">
+        <div class="ability-name">${abilityName}</div>
+        <div class="ability-text">${abilityText}</div>
+      </div>
+
+      <div class="equip-section">
+        <label class="field-label">Equipment (4 slots — Large items take 2)</label>
+        <div class="equip-grid">
+          ${[0,1,2,3].map(i => {
+            const isCustom = h.equipCustom && h.equipCustom[i];
+            return `
+          <div class="equip-slot">
+            <span class="equip-slot-num">${i+1}</span>
+            ${isCustom ? `
+              <input class="equip-custom-input" placeholder="Custom item..." value="${esc(h.equip[i]||'')}"
+                oninput="updateEquip(${h.id},${i},this.value)">
+              <button class="equip-back-btn" onclick="clearCustomEquip(${h.id},${i})" title="Back to list">↩</button>
+            ` : `
+              <select class="equip-select" onchange="updateEquip(${h.id},${i},this.value)">
+                ${EQUIP_OPTIONS.map(o => o.divider
+                  ? `<optgroup label="${o.label}"></optgroup>`
+                  : `<option value="${esc(o.value)}" ${(h.equip[i]||'')=== o.value ? 'selected' : ''}>${o.label}</option>`
+                ).join('')}
+              </select>
+            `}
+          </div>`;
+          }).join('')}
+        </div>
+      </div>
+
+      <div class="relic-section">
+        <label class="field-label">Magic Relic</label>
+        <select class="field-select" style="font-size:10px;" onchange="assignRelic(${h.id},this.value)">
+          <option value="">— none assigned —</option>
+          ${relics.map(r=>`<option value="${r.id}" ${h.assignedRelicId===r.id?'selected':''}>${r.mundane?'[Mundane] ':'[Magic] '}${r.type}${r.props.length?' · '+r.props.length+' propert'+(r.props.length===1?'y':'ies'):''}</option>`).join('')}
+        </select>
+        ${h.assignedRelicId ? (()=>{const r=relics.find(x=>x.id===h.assignedRelicId);return r?`<div style="font-family:'Crimson Text',serif;font-style:italic;font-size:9.5px;color:var(--gold);margin-top:3px;line-height:1.4;">${r.props.join(' / ')||'No magical properties.'}</div>`:''})():''}
+      </div>
+
+      <div class="damage-track">
+        <span class="track-label">HP Track</span>
+        <div class="track-boxes" id="dmg-${h.id}">
+          ${h.dmgBoxes.map((filled,i)=>`
+          <div class="dmg-box ${filled?'filled':''}" onclick="toggleDmgBox(${h.id},${i})" title="Click to mark damage"></div>
+          `).join('')}
+        </div>
+      </div>
+
+    </div>
+  `;
+  return card;
+}
+
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// === MUTATIONS ===
+function addHero() {
+  if(heroes.length >= 6){ showToast('A Warband holds 6 heroes — that\'s your limit!'); return; }
+  heroes.push(defaultHero());
+  render();
+  autosave();
+}
+
+function generateWarband() {
+  if(heroes.length > 0) {
+    if(!confirm('This will replace your current warband with 6 random heroes. Continue?')) return;
+  }
+  heroes = [];
+  nextId = 0;
+
+  const mashKeys = Object.keys(MASH);
+  const mageSubtypeKeys = Object.keys(MAGE_SUBTYPES);
+  const armorOptions = ['None','Light','Medium','Heavy','Shield'];
+
+  function pick(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
+  function statNum(str) { return parseInt((str||'0').replace('+','')) || 0; }
+
+  // Equipment pools by category
+  const meleeLarge = EQUIP_OPTIONS.filter(o =>
+    o.value && !o.divider && o.value !== '__custom__' &&
+    o.value.includes('[2 slots]') &&
+    (o.value.startsWith('Large Blunt') || o.value.startsWith('Large Sharp'))
+  ).map(o => o.value);
+
+  const meleeMedium = EQUIP_OPTIONS.filter(o =>
+    o.value && !o.divider && o.value !== '__custom__' &&
+    !o.value.includes('[2 slots]') &&
+    (o.value.startsWith('Medium Blunt') || o.value.startsWith('Medium Sharp'))
+  ).map(o => o.value);
+
+  const ranged = EQUIP_OPTIONS.filter(o =>
+    o.value && !o.divider && o.value !== '__custom__' &&
+    (o.value.startsWith('Traditional') || o.value.startsWith('Mechanical') ||
+     o.value.startsWith('Small Firearm') || o.value.startsWith('Large Firearm'))
+  ).map(o => o.value);
+
+  const magic = EQUIP_OPTIONS.filter(o =>
+    o.value && !o.divider && o.value !== '__custom__' &&
+    (o.value.startsWith('Small Magic') || o.value.startsWith('Medium Magic') || o.value.startsWith('Large Magic'))
+  ).map(o => o.value);
+
+  // Filler pool: single-slot WEAPONS only (no armor, no special items) for the second item
+  const weaponSingleSlot = EQUIP_OPTIONS.filter(o =>
+    o.value && !o.divider && o.value !== '__custom__' && !o.value.includes('[2 slots]') &&
+    (o.value.startsWith('Small Blunt') || o.value.startsWith('Small Sharp') ||
+     o.value.startsWith('Medium Blunt') || o.value.startsWith('Medium Sharp') ||
+     o.value.startsWith('Traditional') || o.value.startsWith('Mechanical') ||
+     o.value.startsWith('Small Firearm') || o.value.startsWith('Small Magic'))
+  ).map(o => o.value);
+
+  // Knight fallback pool: all single-slot weapons
+  const allWeaponsSingle = weaponSingleSlot;
+
+  for(let i=0;i<6;i++) {
+    const h = defaultHero();
+
+    // Random MASH
+    const mash = pick(mashKeys);
+    h.mash = mash;
+    const mashData = MASH[mash];
+    h.maxHP = mashData.hp;
+    h.currentHP = mashData.hp;
+
+    // Mage gets a random subtype
+    if(mash === 'Mage') {
+      h.mageSubtype = pick(mageSubtypeKeys);
+    }
+
+    // Random armor goes in the armor dropdown, not equipment slots
+    h.armorType = pick(armorOptions);
+
+    // Determine primary weapon based on MASH stat thresholds
+    const mVal = statNum(mashData.m);
+    const aVal = statNum(mashData.a);
+    const sVal = statNum(mashData.s);
+
+    let primaryWeapon = null;
+    let primaryTakesTwo = false;
+
+    if(mVal >= 3) {
+      // Might 3+: large or medium melee weapon
+      // 50% chance large (2 slots), 50% chance medium (1 slot)
+      if(Math.random() < 0.5 && meleeLarge.length) {
+        primaryWeapon = pick(meleeLarge);
+        primaryTakesTwo = true;
+      } else {
+        primaryWeapon = pick(meleeMedium);
+      }
+    } else if(aVal >= 3) {
+      // Accuracy 3+: traditional, mechanical, or firearm ranged weapon
+      primaryWeapon = pick(ranged);
+      // Large Firearm takes 2 slots
+      if(primaryWeapon && primaryWeapon.includes('[2 slots]')) primaryTakesTwo = true;
+    } else if(sVal >= 3) {
+      // Soul 3+: magic weapon of any size
+      primaryWeapon = pick(magic);
+      if(primaryWeapon && primaryWeapon.includes('[2 slots]')) primaryTakesTwo = true;
+    } else {
+      // No dominant stat (e.g. Knight): random single-slot weapon
+      primaryWeapon = pick(allWeaponsSingle);
+    }
+
+    // Second item: always a weapon, avoid duplicating primary
+    let secondItem = pick(weaponSingleSlot);
+    for(let t=0;t<5;t++){ if(secondItem !== primaryWeapon) break; secondItem = pick(weaponSingleSlot); }
+
+    // Fill slots: if primary takes 2 slots, it occupies slots 1+2, second item in slot 3
+    if(primaryTakesTwo) {
+      h.equip = [primaryWeapon, '', secondItem, ''];
+    } else {
+      h.equip = [primaryWeapon, secondItem, '', ''];
+    }
+
+    heroes.push(h);
+  }
+
+  render();
+  autosave();
+  showToast('Random warband recruited!');
+}
+
+function removeHero(id) {
+  heroes = heroes.filter(h=>h.id!==id);
+  render();
+  autosave();
+}
+
+function moveHero(id, dir) {
+  const idx = heroes.findIndex(h=>h.id===id);
+  const newIdx = idx+dir;
+  if(newIdx<0||newIdx>=heroes.length) return;
+  [heroes[idx],heroes[newIdx]] = [heroes[newIdx],heroes[idx]];
+  render();
+  autosave();
+}
+
+function toggleKO(id) {
+  const h = heroes.find(h=>h.id===id);
+  if(!h) return;
+  h.knockedOut = !h.knockedOut;
+  if(h.knockedOut) h.currentHP = 0;
+  render();
+  autosave();
+}
+
+function updateField(id, field, val) {
+  const h = heroes.find(h=>h.id===id);
+  if(!h) return;
+  h[field] = val;
+  autosave();
+}
+
+function updateMash(id, mash) {
+  const h = heroes.find(h=>h.id===id);
+  if(!h) return;
+  h.mash = mash;
+  h.mageSubtype = '';
+  const data = MASH[mash];
+  if(data){ h.maxHP = data.hp; h.currentHP = data.hp; }
+  render();
+  autosave();
+}
+
+function updateEquip(id, slot, val) {
+  const h = heroes.find(h=>h.id===id);
+  if(!h) return;
+  if(val === '__custom__') {
+    h.equipCustom[slot] = true;
+    h.equip[slot] = '';
+    render();
+  } else {
+    h.equip[slot] = val;
+  }
+  autosave();
+}
+
+function clearCustomEquip(id, slot) {
+  const h = heroes.find(h=>h.id===id);
+  if(!h) return;
+  h.equipCustom[slot] = false;
+  h.equip[slot] = '';
+  render();
+  autosave();
+}
+
+// === MAGIC RELICS ===
+function generateAndAddRelic(mundane) {
+  const r = generateRelic(mundane);
+  r.id = 'r'+(nextRelicId++);
+  relics.push(r);
+  render();
+  autosave();
+  showToast(mundane ? 'Mundane Relic generated!' : 'Magic Relic generated!');
+}
+
+function removeRelic(rid) {
+  // unassign from any hero first
+  heroes.forEach(h=>{ if(h.assignedRelicId===rid) h.assignedRelicId=null; });
+  relics = relics.filter(r=>r.id!==rid);
+  render();
+  autosave();
+}
+
+function assignRelic(heroId, rid) {
+  const h = heroes.find(h=>h.id===heroId);
+  if(!h) return;
+  // unassign this relic from any other hero
+  if(rid) heroes.forEach(oh=>{ if(oh.id!==heroId && oh.assignedRelicId===rid) oh.assignedRelicId=null; });
+  h.assignedRelicId = rid || null;
+  render();
+  autosave();
+}
+
+
+
+function toggleDmgBox(id, boxIdx) {
+  const h = heroes.find(h=>h.id===id);
+  if(!h) return;
+  h.dmgBoxes[boxIdx] = !h.dmgBoxes[boxIdx];
+  const boxes = document.querySelectorAll(`#dmg-${id} .dmg-box`);
+  if(boxes[boxIdx]) boxes[boxIdx].className = 'dmg-box' + (h.dmgBoxes[boxIdx]?' filled':'');
+  autosave();
+}
+
+function adjustGold(delta) {
+  const el = document.getElementById('goldAmount');
+  el.value = Math.max(0, parseInt(el.value||0) + delta);
+  autosave();
+}
+
+// === PORTRAIT UPLOAD ===
+function uploadPortrait(id) {
+  const inp = document.createElement('input');
+  inp.type = 'file';
+  inp.accept = 'image/*';
+  inp.onchange = e => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const h = heroes.find(h=>h.id===id);
+      if(!h) return;
+      h.portrait = ev.target.result;
+      const box = document.getElementById('portrait-'+id);
+      if(box) box.innerHTML = `<img src="${ev.target.result}" alt="portrait">`;
+      autosave();
+    };
+    reader.readAsDataURL(file);
+  };
+  inp.click();
+}
+
+// === QUICK REF ===
+function toggleQR() {
+  document.getElementById('quickRef').classList.toggle('open');
+}
+
+// === PERSIST ===
+function gatherState() {
+  return {
+    warbandName: document.getElementById('warbandName').value,
+    patronDeity: document.getElementById('patronDeity').value,
+    warbandNotes: document.getElementById('warbandNotes').value,
+    warbandLore: document.getElementById('warbandLore').value,
+    gold: document.getElementById('goldAmount').value,
+    heroes,
+    nextId,
+    relics,
+    nextRelicId,
+  };
+}
+
+function autosave() {
+  try {
+    const state = gatherState();
+    localStorage.setItem('apocathon_warband', JSON.stringify(state));
+  } catch(e){}
+}
+
+function loadState(state) {
+  if(!state) return;
+  document.getElementById('warbandName').value = state.warbandName||'';
+  document.getElementById('patronDeity').value = state.patronDeity||'';
+  document.getElementById('warbandNotes').value = state.warbandNotes||'';
+  document.getElementById('warbandLore').value = state.warbandLore||'';
+  document.getElementById('goldAmount').value = state.gold||0;
+  heroes = (state.heroes||[]).map(h=>({
+    ...defaultHero(),
+    ...h,
+    dmgBoxes: h.dmgBoxes || Array(16).fill(false),
+    equip: h.equip || ['','','',''],
+    equipCustom: h.equipCustom || [false,false,false,false],
+    assignedRelicId: h.assignedRelicId || null,
+  }));
+  nextId = state.nextId || heroes.length;
+  relics = state.relics || [];
+  nextRelicId = state.nextRelicId || relics.length;
+  render();
+}
+
+function saveToFile() {
+  const state = gatherState();
+  const warbandName = state.warbandName || 'Warband';
+
+  // Build hero cards HTML for the print window
+  function heroCardHTML(h, idx) {
+    const mashData = MASH[h.mash] || {};
+    const isMage = h.mash === 'Mage';
+    const subtypeData = isMage && h.mageSubtype ? MAGE_SUBTYPES[h.mageSubtype] : null;
+    const abilityName = subtypeData ? subtypeData.ability : (mashData.ability || '—');
+    const abilityText = subtypeData ? subtypeData.abilityText : (mashData.abilityText || '');
+    const armorSave = ARMOR_SAVES[h.armorType] || '—';
+    const maxHP = mashData.hp || 0;
+    const filledBoxes = h.dmgBoxes ? h.dmgBoxes.filter(Boolean).length : 0;
+
+    const equipRows = h.equip.map((e,i) =>
+      `<div class="p-equip-slot"><span class="p-slot-num">${i+1}</span><span class="p-slot-val">${e||''}</span></div>`
+    ).join('');
+
+    const dmgBoxes = (h.dmgBoxes||Array(16).fill(false)).map((filled,i) =>
+      `<div class="p-dmg-box ${filled?'p-filled':''}"></div>`
+    ).join('');
+
+    const portraitHTML = h.portrait
+      ? `<img src="${h.portrait}" class="p-portrait-img" alt="portrait">`
+      : `<div class="p-portrait-empty"></div>`;
+
+    return `
+    <div class="p-hero-card ${h.knockedOut ? 'p-ko' : ''}">
+      <div class="p-hero-head">
+        <span class="p-hero-num">Hero ${idx+1}</span>
+        <span class="p-mash-badge">${h.mash || '—'}${isMage && h.mageSubtype ? ' · '+h.mageSubtype : ''}</span>
+        ${h.knockedOut ? '<span class="p-ko-badge">KNOCKED OUT</span>' : ''}
+      </div>
+      <div class="p-hero-body">
+        <div class="p-top-row">
+          ${portraitHTML}
+          <div class="p-name-block">
+            <div class="p-field-label">Name</div>
+            <div class="p-name">${h.name || '—'}</div>
+            <div class="p-armor-line"><span class="p-field-label">Armor:</span> ${h.armorType||'None'} &nbsp;|&nbsp; <span class="p-field-label">Save:</span> ${armorSave}</div>
+          </div>
+          <div class="p-hp-circle">
+            <div class="p-hp-num">${maxHP||'—'}</div>
+            <div class="p-hp-label">HP</div>
+          </div>
+        </div>
+        <div class="p-mash-row">
+          <div class="p-mash-stat"><div class="p-mash-val">${mashData.m||'—'}</div><div class="p-mash-key">Might</div></div>
+          <div class="p-mash-stat"><div class="p-mash-val">${mashData.a||'—'}</div><div class="p-mash-key">Accuracy</div></div>
+          <div class="p-mash-stat"><div class="p-mash-val">${mashData.s||'—'}</div><div class="p-mash-key">Soul</div></div>
+        </div>
+        <div class="p-ability">
+          <span class="p-ability-name">${abilityName}:</span> <span class="p-ability-text">${abilityText}</span>
+        </div>
+        <div class="p-equip-grid">${equipRows}</div>
+        ${(()=>{ const r=state.relics&&state.relics.find(x=>x.id===h.assignedRelicId); return r?`<div class="p-relic">✦ ${r.type}${r.props.length?' · '+r.props.join(' / '):''}</div>`:''; })()}
+        <div class="p-track-row">
+          <span class="p-field-label">HP Track</span>
+          <div class="p-dmg-track">${dmgBoxes}</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  const heroCardsHTML = (state.heroes||[]).map((h,i) => heroCardHTML(h,i)).join('');
+
+  const printDoc = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Apocathon — ${warbandName}</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;1,400&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: white; font-family: 'Special Elite', serif; color: #1a1a2e; font-size: 10px; }
+  .p-page { padding: 16mm 14mm; }
+
+  /* Header */
+  .p-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #1a1a2e; padding-bottom: 8px; margin-bottom: 10px; }
+  .p-game-title { font-family: 'Cinzel', serif; font-size: 18px; font-weight: 700; letter-spacing: 0.1em; color: #1a1a2e; }
+  .p-game-sub { font-family: 'Special Elite', serif; font-size: 9px; letter-spacing: 0.15em; color: #6b8477; text-transform: uppercase; }
+  .p-wb-info { text-align: right; }
+  .p-wb-name { font-family: 'Cinzel', serif; font-size: 14px; font-weight: 600; }
+  .p-wb-deity { font-size: 9px; color: #6b8477; margin-top: 2px; }
+
+  /* Notes / Lore */
+  .p-notes-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .p-notes-box { border: 1px solid #c8bfa8; border-radius: 4px; padding: 6px 8px; min-height: 40px; }
+  .p-box-label { font-family: 'Cinzel', serif; font-size: 8px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #6b8477; margin-bottom: 3px; }
+  .p-box-text { font-family: 'Crimson Text', serif; font-size: 10px; line-height: 1.4; color: #1a1a2e; }
+
+  /* Hero grid */
+  .p-hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  /* Hero card */
+  .p-hero-card { border: 1.5px solid #c8bfa8; border-radius: 5px; overflow: hidden; break-inside: avoid; }
+  .p-hero-card.p-ko { opacity: 0.55; }
+  .p-hero-head { background: #8fa89b; padding: 4px 8px; display: flex; align-items: center; gap: 6px; }
+  .p-hero-num { font-family: 'Cinzel', serif; font-size: 8px; font-weight: 600; letter-spacing: 0.15em; color: rgba(255,255,255,0.75); text-transform: uppercase; }
+  .p-mash-badge { font-family: 'Cinzel', serif; font-size: 9px; font-weight: 600; color: white; margin-left: auto; }
+  .p-ko-badge { font-family: 'Cinzel', serif; font-size: 8px; font-weight: 700; color: #c0392b; background: white; padding: 1px 5px; border-radius: 2px; margin-left: 4px; }
+
+  .p-hero-body { padding: 7px 8px 6px; }
+
+  /* Top row */
+  .p-top-row { display: flex; gap: 6px; align-items: flex-start; margin-bottom: 6px; }
+  .p-portrait-img { width: 44px; height: 50px; object-fit: cover; border-radius: 2px; border: 1px solid #c8bfa8; flex-shrink: 0; }
+  .p-portrait-empty { width: 44px; height: 50px; border: 1px dashed #c8bfa8; border-radius: 2px; flex-shrink: 0; background: #f4f0e8; }
+  .p-name-block { flex: 1; }
+  .p-field-label { font-family: 'Special Elite', serif; font-size: 7.5px; letter-spacing: 0.1em; text-transform: uppercase; color: #6b8477; display: inline-block; }
+  .p-name { font-family: 'Cinzel', serif; font-size: 12px; font-weight: 600; color: #1a1a2e; line-height: 1.1; margin-bottom: 4px; min-height: 14px; border-bottom: 1px solid #c8bfa8; padding-bottom: 2px; }
+  .p-armor-line { font-size: 8.5px; color: #1a1a2e; margin-top: 4px; }
+  .p-hp-circle { width: 38px; height: 38px; border: 2px solid #1a1a2e; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
+  .p-hp-num { font-family: 'Cinzel', serif; font-size: 14px; font-weight: 700; line-height: 1; }
+  .p-hp-label { font-family: 'Special Elite', serif; font-size: 7px; color: #6b8477; }
+
+  /* MASH stats */
+  .p-mash-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 4px; margin-bottom: 5px; }
+  .p-mash-stat { background: rgba(143,168,155,0.12); border: 1px solid #c8bfa8; border-radius: 3px; padding: 3px 2px; text-align: center; }
+  .p-mash-val { font-family: 'Cinzel', serif; font-size: 12px; font-weight: 600; color: #1a1a2e; line-height: 1; }
+  .p-mash-key { font-family: 'Special Elite', serif; font-size: 7px; text-transform: uppercase; letter-spacing: 0.08em; color: #6b8477; }
+
+  /* Ability */
+  .p-ability { background: rgba(143,168,155,0.1); border: 1px solid #c8bfa8; border-radius: 3px; padding: 4px 6px; margin-bottom: 5px; font-size: 8.5px; line-height: 1.35; }
+  .p-ability-name { font-family: 'Cinzel', serif; font-size: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+  .p-ability-text { font-family: 'Crimson Text', serif; font-style: italic; color: #3a3a50; }
+
+  /* Equipment */
+  .p-equip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; margin-bottom: 4px; }
+  .p-equip-slot { display: flex; gap: 3px; align-items: center; border: 1px dashed #c8bfa8; border-radius: 2px; padding: 2px 4px; min-height: 16px; }
+  .p-slot-num { font-family: 'Cinzel', serif; font-size: 7px; font-weight: 600; color: #6b8477; flex-shrink: 0; width: 8px; }
+  .p-slot-val { font-size: 8.5px; color: #1a1a2e; }
+
+  /* Relic */
+  .p-relic { font-size: 8px; color: #9b7b2e; border-top: 1px dashed #c8bfa8; padding-top: 3px; margin-bottom: 3px; font-family: 'Crimson Text', serif; font-style: italic; }
+
+  /* Damage track */
+  .p-track-row { display: flex; align-items: center; gap: 5px; }
+  .p-dmg-track { display: flex; gap: 2px; flex-wrap: wrap; }
+  .p-dmg-box { width: 10px; height: 10px; border-radius: 50%; border: 1px solid #c8bfa8; background: #e0dbd0; }
+  .p-dmg-box.p-filled { background: #c0392b; border-color: #c0392b; }
+
+  /* Gold + footer */
+  .p-footer { border-top: 1px solid #c8bfa8; margin-top: 10px; padding-top: 6px; display: flex; justify-content: space-between; font-size: 8px; color: #6b8477; font-family: 'Special Elite', serif; }
+  .p-gold { font-family: 'Cinzel', serif; font-size: 11px; font-weight: 600; color: #9b7b2e; }
+
+  @media print {
+    @page { size: A4; margin: 0; }
+    body { margin: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="p-page">
+  <div class="p-header">
+    <div>
+      <div class="p-game-title">APOCATHON</div>
+      <div class="p-game-sub">Epic Toy Wargaming — Warband Sheet</div>
+    </div>
+    <div class="p-wb-info">
+      <div class="p-wb-name">${state.warbandName || '—'}</div>
+      <div class="p-wb-deity">Patron Deity: ${state.patronDeity || '—'}</div>
+    </div>
+  </div>
+
+  <div class="p-notes-row">
+    <div class="p-notes-box">
+      <div class="p-box-label">Notes</div>
+      <div class="p-box-text">${(state.warbandNotes||'').replace(/\n/g,'<br>')}</div>
+    </div>
+    <div class="p-notes-box">
+      <div class="p-box-label">Lore</div>
+      <div class="p-box-text">${(state.warbandLore||'').replace(/\n/g,'<br>')}</div>
+    </div>
+  </div>
+
+  <div class="p-hero-grid">
+    ${heroCardsHTML}
+  </div>
+
+  <div class="p-footer">
+    <span>Apocathon — Epic Toy Wargaming &nbsp;|&nbsp; Created by Simon Alexander</span>
+    <span class="p-gold">⚜ ${state.gold || 0} Gold</span>
+  </div>
+</div>
+<script>
+  window.onload = function() {
+    setTimeout(function(){ window.print(); }, 600);
+  };
+<\/script>
+</body>
+</html>`;
+
+  const printWin = window.open('', '_blank', 'width=900,height=700');
+  if (!printWin) { showToast('Please allow popups to export PDF.'); return; }
+  printWin.document.write(printDoc);
+  printWin.document.close();
+  showToast('PDF export opened — use "Save as PDF" in the print dialog.');
+}
+
+function loadFromFile() {
+  document.getElementById('fileInput').click();
+}
+
+function handleFileLoad(e) {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const state = JSON.parse(ev.target.result);
+      loadState(state);
+      showToast('Warband loaded!');
+    } catch(err) {
+      showToast('Error: could not read file.');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+
+function clearAll() {
+  if(!confirm('Clear this entire warband? This cannot be undone.')) return;
+  heroes = [];
+  relics = [];
+  nextId = 0;
+  nextRelicId = 0;
+  document.getElementById('warbandName').value='';
+  document.getElementById('patronDeity').value='';
+  document.getElementById('warbandNotes').value='';
+  document.getElementById('warbandLore').value='';
+  document.getElementById('goldAmount').value='0';
+  render();
+  autosave();
+  showToast('Warband cleared.');
+}
+
+function printSheet() {
+  window.print();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+// === INIT ===
+window.addEventListener('DOMContentLoaded', ()=>{
+  try {
+    const saved = localStorage.getItem('apocathon_warband');
+    if(saved) loadState(JSON.parse(saved));
+    else render();
+  } catch(e){ render(); }
+});
+</script>
+</body>
+</html>
