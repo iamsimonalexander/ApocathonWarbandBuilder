@@ -1,0 +1,1947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APOCATHON — Epic Toy Wargaming</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=IM+Fell+English+SC&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap');
+
+  :root {
+    /* Earthy parchment-and-stone fantasy palette */
+    --bg:       #1e1710;   /* dark walnut */
+    --panel:    #2a2016;   /* worn leather */
+    --panel2:   #352a18;   /* saddle brown */
+    --accent:   #c0392b;   /* blood red */
+    --accent2:  #d4a017;   /* antique gold */
+    --p1:       #e8c97a;   /* pale gold / candlelight */
+    --p2:       #7ab8a0;   /* sage green */
+    --text:     #e8dfc8;   /* aged parchment */
+    --muted:    #8a7a60;   /* faded ink */
+    --border:   #4a3a22;   /* dark oak */
+    --grid-line:#2e2414;   /* deep wood grain */
+    --terrain:  #5a4a30;   /* mossy stone */
+    --ko:       #2a2016;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 20% 20%, #2e2010 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 80%, #251e0e 0%, transparent 60%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='80' height='80' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    color: var(--text);
+    font-family: 'Crimson Pro', serif;
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, .title { font-family: 'Cinzel Decorative', cursive; }
+  code, .mono { font-family: 'IM Fell English SC', serif; }
+
+  /* ====== SCREENS ====== */
+  .screen { display: none; padding: 16px; max-width: 1300px; margin: 0 auto; }
+  .screen.active { display: block; }
+
+  /* ====== TITLE SCREEN ====== */
+  #screen-title { text-align: center; padding-top: 60px; }
+  #screen-title h1 {
+    font-size: clamp(2rem, 6vw, 4rem);
+    color: var(--accent2);
+    text-shadow: 0 0 40px #d4a01766, 2px 2px 0 #1a0e05, 0 0 80px #c0392b44;
+    letter-spacing: 6px;
+  }
+  #screen-title .subtitle { color: var(--muted); font-size: 1rem; margin: 8px 0 40px; letter-spacing: 8px; text-transform: uppercase; font-family: 'IM Fell English SC', serif; }
+  .big-btn {
+    background: linear-gradient(160deg, #8b1a1a, #5a0f0f);
+    color: var(--accent2);
+    border: 1px solid #a0320a;
+    padding: 14px 36px;
+    font-size: 1.1rem;
+    font-family: 'Cinzel Decorative', cursive;
+    cursor: pointer;
+    border-radius: 3px;
+    margin: 8px;
+    transition: all .2s;
+    box-shadow: 0 2px 8px #0008, inset 0 1px 0 #c0392b44;
+    letter-spacing: 1px;
+  }
+  .big-btn:hover { background: linear-gradient(160deg, #a02020, #6a1515); transform: translateY(-2px); box-shadow: 0 4px 18px #0009, 0 0 12px #c0392b55; color: #f0d080; }
+  .big-btn.secondary { background: linear-gradient(160deg, #2e2416, #1e1710); border: 1px solid var(--accent2); color: var(--accent2); }
+  .big-btn.secondary:hover { background: linear-gradient(160deg, #3e3020, #2a2010); }
+  .flavor { max-width: 600px; margin: 40px auto 0; color: var(--muted); font-style: italic; line-height: 1.8; border-left: 2px solid var(--accent2); padding-left: 16px; text-align: left; font-size: 1.05rem; }
+
+  /* ====== SETUP SCREEN ====== */
+  #screen-setup h2 { font-size: 1.8rem; color: var(--accent2); margin-bottom: 4px; }
+  .setup-top { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+  .setup-top input { background: var(--panel); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; font-size: 1rem; border-radius: 3px; width: 220px; font-family: inherit; }
+  .player-label { font-size: 0.9rem; color: var(--muted); margin-right: 4px; }
+  .roster-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; margin-bottom: 16px; }
+  .hero-slot { background: var(--panel); border: 1px solid var(--border); border-radius: 4px; padding: 12px; box-shadow: inset 0 1px 0 #ffffff08; }
+  .hero-slot h4 { font-size: 0.85rem; color: var(--muted); margin-bottom: 6px; font-family: 'IM Fell English SC', serif; letter-spacing: 1px; }
+  .hero-slot select { width: 100%; background: var(--panel2); border: 1px solid var(--border); color: var(--text); padding: 6px; border-radius: 3px; font-family: inherit; margin-bottom: 6px; }
+  .hero-slot input { width: 100%; background: var(--panel2); border: 1px solid var(--border); color: var(--text); padding: 5px 8px; border-radius: 3px; font-family: inherit; font-size: 0.9rem; margin-bottom: 6px; }
+  .equip-row { display: flex; gap: 6px; }
+  .equip-row select { flex: 1; background: var(--panel2); border: 1px solid var(--border); color: var(--text); padding: 4px; border-radius: 3px; font-family: inherit; font-size: 0.85rem; }
+  .stat-preview { font-size: 0.8rem; color: var(--accent2); font-family: 'IM Fell English SC', serif; margin-top: 4px; letter-spacing: 1px; }
+  .setup-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  /* Randomize button */
+  .randomize-btn { background: var(--panel2); border: 1px solid var(--accent2); color: var(--accent2); padding: 7px 14px; border-radius: 3px; cursor: pointer; font-family: inherit; font-size: 0.92rem; transition: all .15s; white-space: nowrap; }
+  .randomize-btn:hover { background: var(--accent2); color: #1a1008; transform: scale(1.04); }
+
+  /* ====== BATTLE SCREEN ====== */
+  #screen-battle { max-width: 1400px; }
+  .battle-layout { display: grid; grid-template-columns: 200px 1fr 220px; gap: 10px; }
+  @media(max-width: 900px) { .battle-layout { grid-template-columns: 1fr; } }
+
+  /* Sidebar */
+  .sidebar { display: flex; flex-direction: column; gap: 8px; }
+  .sidebar-title { font-family: 'Cinzel Decorative', cursive; font-size: 0.7rem; color: var(--accent2); letter-spacing: 3px; text-transform: uppercase; border-bottom: 1px solid var(--border); padding-bottom: 4px; margin-bottom: 4px; }
+  .mini-card { background: var(--panel); border: 1px solid var(--border); border-radius: 3px; padding: 8px; font-size: 0.78rem; cursor: pointer; transition: border-color .15s; }
+  .mini-card:hover { border-color: var(--accent2); }
+  .mini-card.selected { border-color: var(--accent2); background: var(--panel2); box-shadow: inset 0 0 0 1px var(--accent2)44; }
+  .mini-card.ko { opacity: 0.38; cursor: default; border-color: var(--ko); }
+  .mini-card .name { font-weight: 600; font-size: 0.88rem; margin-bottom: 3px; color: var(--text); }
+  .mini-card .mash { font-family: 'IM Fell English SC', serif; color: var(--accent2); font-size: 0.75rem; letter-spacing: 1px; }
+  .hp-bar { height: 5px; background: var(--border); border-radius: 2px; margin-top: 4px; }
+  .hp-fill { height: 100%; border-radius: 2px; transition: width .3s; }
+
+  /* Grid */
+  .grid-area { display: flex; flex-direction: column; align-items: center; }
+  #battle-grid { display: grid; border: 2px solid var(--border); background: var(--grid-bg, #241c0e); cursor: pointer; box-shadow: 0 0 30px #0009, inset 0 0 60px #00000022; }
+  .cell { width: 44px; height: 44px; border-right: 1px solid var(--grid-line); border-bottom: 1px solid var(--grid-line); position: relative; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; transition: background .1s; user-select: none; }
+  .cell:hover { background: var(--cell-hover, #2e2414); }
+  .cell.reachable { background: var(--cell-reachable, #1e3018) !important; box-shadow: inset 0 0 0 1px #4a7a3044; }
+  .cell.attackable { background: var(--cell-attackable, #3a1410) !important; box-shadow: inset 0 0 0 1px #8a302044; }
+  .cell.selected-cell { background: var(--cell-selected, #3a2c10) !important; box-shadow: inset 0 0 0 2px var(--accent2); }
+  .cell.terrain { background: var(--terrain) !important; cursor: default; }
+  .cell.terrain:hover { background: var(--terrain) !important; }
+  .terrain-cell::after { content: '▪'; font-size: 1.4rem; color: var(--terrain-glyph, #7a6040); }
+
+  /* Turn banner */
+  .turn-banner { background: var(--panel2); border: 1px solid var(--border); border-radius: 4px; padding: 8px 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; box-shadow: 0 2px 8px #0005; }
+  .turn-banner .round { font-family: 'IM Fell English SC', serif; color: var(--muted); font-size: 0.9rem; letter-spacing: 2px; }
+  .turn-banner .active-player { font-family: 'Cinzel Decorative', cursive; font-size: 1rem; }
+  .turn-banner .orders { font-family: 'IM Fell English SC', serif; font-size: 0.85rem; color: var(--muted); letter-spacing: 1px; }
+  .order-btn { background: var(--panel); border: 1px solid var(--accent2); color: var(--accent2); padding: 4px 12px; border-radius: 3px; cursor: pointer; font-family: inherit; font-size: 0.9rem; transition: all .15s; }
+  .order-btn:hover:not(:disabled) { background: var(--accent2); color: #1a1008; }
+  .order-btn:disabled { opacity: 0.25; cursor: default; }
+  .order-btn.attack { border-color: var(--accent); color: #e87060; }
+  .order-btn.attack:hover:not(:disabled) { background: var(--accent); color: #fff; }
+  .end-turn-btn { background: linear-gradient(160deg, #8b1a1a, #5a0f0f); color: var(--accent2); border: 1px solid #a03020; padding: 6px 16px; border-radius: 3px; cursor: pointer; font-family: 'Cinzel Decorative', cursive; font-size: 0.72rem; margin-left: auto; transition: all .15s; letter-spacing: 1px; }
+  .end-turn-btn:hover { background: linear-gradient(160deg, #a02020, #6a1515); }
+
+  /* Log */
+  .log-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 4px; padding: 10px; height: 500px; display: flex; flex-direction: column; box-shadow: inset 0 2px 8px #0004; }
+  .log-title { font-family: 'Cinzel Decorative', cursive; font-size: 0.68rem; color: var(--accent2); letter-spacing: 3px; margin-bottom: 6px; text-transform: uppercase; }
+  .log-entries { flex: 1; overflow-y: auto; font-size: 0.82rem; line-height: 1.65; }
+  .log-entries::-webkit-scrollbar { width: 4px; }
+  .log-entries::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .log-entry { padding: 2px 0; border-bottom: 1px solid var(--grid-line); }
+  .log-entry.hit { color: #e87060; }
+  .log-entry.miss { color: var(--muted); }
+  .log-entry.heal { color: #90c8a8; }
+  .log-entry.ko-msg { color: var(--accent2); font-weight: bold; }
+  .log-entry.sys { color: #b8962a; font-style: italic; }
+  .log-entry.info { color: var(--text); }
+
+  /* Selected model detail */
+  .model-detail { background: var(--panel); border: 1px solid var(--border); border-radius: 4px; padding: 10px; font-size: 0.8rem; margin-top: 8px; }
+  .model-detail .dname { font-size: 1rem; font-weight: 600; margin-bottom: 4px; color: var(--accent2); font-family: 'Cinzel Decorative', cursive; font-size: 0.85rem; }
+  .model-detail .dstats { font-family: 'IM Fell English SC', serif; color: var(--accent2); margin-bottom: 4px; letter-spacing: 1px; }
+  .model-detail .dability { color: var(--muted); font-style: italic; margin-bottom: 4px; }
+  .model-detail .dequip { font-size: 0.78rem; color: var(--text); }
+
+  /* Victory */
+  #screen-victory { text-align: center; padding-top: 80px; }
+  #screen-victory h2 { font-size: 3rem; color: var(--accent2); margin-bottom: 16px; text-shadow: 0 0 40px #d4a01766; }
+  #screen-victory .winner-name { font-size: 1.8rem; color: var(--text); margin-bottom: 30px; font-style: italic; }
+
+  /* Misc */
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 2px; font-size: 0.72rem; font-family: 'IM Fell English SC', serif; letter-spacing: 1px; }
+  .badge.p1 { background: #5a4800; color: var(--p1); border: 1px solid var(--p1); }
+  .badge.p2 { background: #0e3028; color: var(--p2); border: 1px solid var(--p2); }
+  hr { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+  .info-box { background: var(--panel2); border: 1px solid var(--border); border-radius: 3px; padding: 8px 12px; font-size: 0.82rem; color: var(--muted); margin-top: 6px; font-style: italic; }
+
+  /* Ability popup */
+  .ability-btn { background: #2a2040; border: 1px solid #7a60c0; color: #c0a8f0; padding: 4px 10px; border-radius: 3px; cursor: pointer; font-family: inherit; font-size: 0.85rem; transition: all .15s; margin-top: 4px; }
+  .ability-btn:hover:not(:disabled) { background: #3a3060; }
+  .ability-btn:disabled { opacity: 0.3; cursor: default; }
+
+  /* Model emoji tokens */
+  .model { width: 38px; height: 38px; border-radius: 50%; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; line-height: 1; position: relative; cursor: pointer; background: transparent !important; }
+  .model.p1 { border-color: var(--p1); box-shadow: 0 0 8px #d4a01766; }
+  .model.p2 { border-color: var(--p2); box-shadow: 0 0 8px #7ab8a066; }
+  .model.ko { filter: grayscale(1) opacity(0.3); cursor: default; border-color: #555; box-shadow: none; }
+  .model.selected { box-shadow: 0 0 0 3px var(--accent2), 0 0 16px #d4a01788; }
+
+  /* Dice overlay */
+  #dice-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(10, 7, 3, 0.82);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+  }
+  #dice-overlay.show { display: flex; }
+  .dice-row { display: flex; gap: 32px; align-items: center; }
+  .die {
+    width: 80px; height: 80px;
+    background: #f0e8d0;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 3.2rem;
+    box-shadow: 0 4px 24px #000c, 0 0 0 3px #5a3a18, inset 0 1px 0 #fff6;
+    animation: none;
+    user-select: none;
+    color: #1a0e05;
+  }
+  .die.rolling {
+    animation: diceRoll 0.55s ease-out forwards;
+  }
+  @keyframes diceRoll {
+    0%   { transform: rotate(0deg)   scale(1.1); }
+    20%  { transform: rotate(-18deg) scale(1.25); }
+    40%  { transform: rotate(14deg)  scale(0.95); }
+    60%  { transform: rotate(-9deg)  scale(1.1); }
+    80%  { transform: rotate(5deg)   scale(1.02); }
+    100% { transform: rotate(0deg)   scale(1); }
+  }
+  .dice-label {
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: 0.9rem;
+    color: var(--accent2);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-shadow: 0 0 12px #d4a01788;
+  }
+  .dice-result {
+    font-family: 'IM Fell English SC', serif;
+    font-size: 1.1rem;
+    color: var(--text);
+    text-align: center;
+    min-height: 1.5em;
+    letter-spacing: 1px;
+  }
+  .dice-result .total { font-size: 1.6rem; color: var(--accent2); font-weight: bold; }
+  .dice-result .hit-word { color: #e87060; font-size: 1.4rem; font-family: 'Cinzel Decorative', cursive; }
+  .dice-result .miss-word { color: var(--muted); font-size: 1.4rem; font-family: 'Cinzel Decorative', cursive; }
+
+  /* Slain banner */
+  #slain-banner {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.85);
+    z-index: 10000;
+    background: linear-gradient(135deg, #1a0600ee, #300800ee);
+    border: 2px solid var(--accent, #c0392b);
+    border-radius: 8px;
+    padding: 28px 52px;
+    text-align: center;
+    box-shadow: 0 8px 48px #000c, 0 0 0 1px #ff440022;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  #slain-banner.show {
+    display: block;
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  #slain-banner.hide {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  .slain-name {
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: clamp(1.2rem, 3vw, 2rem);
+    color: var(--accent2, #d4a017);
+    letter-spacing: 3px;
+    text-shadow: 0 0 20px var(--accent2, #d4a017)88;
+    margin-bottom: 8px;
+  }
+  .slain-line {
+    font-family: 'Crimson Pro', serif;
+    font-size: clamp(0.9rem, 2vw, 1.15rem);
+    color: #e8dfc8;
+    font-style: italic;
+    letter-spacing: 1px;
+  }
+  .slain-killer {
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
+    color: var(--accent, #c0392b);
+    letter-spacing: 2px;
+    text-shadow: 0 0 16px var(--accent, #c0392b)88;
+    margin-top: 4px;
+  }
+
+  /* Faction picker */
+  .faction-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 820px; margin: 30px auto; }
+  .faction-card { background: var(--panel); border: 2px solid var(--border); border-radius: 6px; padding: 20px 16px; cursor: pointer; transition: all .2s; text-align: center; }
+  .faction-card:hover { border-color: var(--accent2); background: var(--panel2); transform: translateY(-3px); box-shadow: 0 6px 20px #0006; }
+  .faction-card .fc-icon { font-size: 2.8rem; margin-bottom: 10px; }
+  .faction-card .fc-name { font-family: 'Cinzel Decorative', cursive; font-size: 0.85rem; color: var(--accent2); margin-bottom: 8px; letter-spacing: 1px; }
+  .faction-card .fc-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.5; font-style: italic; }
+  .faction-card .fc-count { font-size: 0.75rem; color: #e87060; margin-top: 8px; font-family: 'IM Fell English SC', serif; letter-spacing: 1px; }
+
+  /* Theme picker */
+  .theme-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; max-width: 960px; margin: 24px auto; }
+  @media(max-width:700px) { .theme-grid { grid-template-columns: repeat(2,1fr); } }
+  .theme-card { border: 2px solid var(--border); border-radius: 8px; padding: 18px 12px 14px; cursor: pointer; transition: all .2s; text-align: center; position: relative; overflow: hidden; }
+  .theme-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px #0008; border-color: #fff6; }
+  .theme-card.chosen { box-shadow: 0 0 0 3px #fff, 0 0 16px #fff6; }
+  .theme-card .tc-icon { font-size: 2.4rem; margin-bottom: 8px; display: block; }
+  .theme-card .tc-name { font-family: 'Cinzel Decorative', cursive; font-size: 0.75rem; letter-spacing: 1px; margin-bottom: 4px; }
+  .theme-card .tc-desc { font-size: 0.72rem; opacity: 0.8; font-style: italic; line-height: 1.4; }
+
+  /* Portrait upload */
+  .portrait-zone { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .portrait-thumb { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--border); object-fit: cover; background: var(--panel2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; overflow: hidden; cursor: pointer; transition: border-color .15s; }
+  .portrait-thumb:hover { border-color: var(--accent2); }
+  .portrait-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .portrait-upload-label { font-size: 0.75rem; color: var(--muted); cursor: pointer; font-style: italic; }
+  .portrait-upload-label:hover { color: var(--accent2); }
+  .portrait-input { display: none; }
+
+  /* Model image on grid */
+  .model-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+</style>
+</head>
+<body>
+
+<!-- TITLE SCREEN -->
+<div id="screen-title" class="screen active">
+  <h1>APOCATHON</h1>
+  <div class="subtitle">Epic Toy Wargaming</div>
+  <button class="big-btn" onclick="pendingMode=1; showScreen('theme')">⚔ 2-Player Battle</button>
+  <button class="big-btn secondary" onclick="pendingMode=2; showScreen('faction')">☠ Solo Mode (vs AI)</button>
+  <div class="flavor">
+    "As the realms of life and death crash together, the gods play their final cards...
+    whichever deity leads a handpicked team of warriors to victory in the Shattered Valley will survive the end of all things!"
+  </div>
+</div>
+
+<!-- FACTION PICKER (Solo) -->
+<div id="screen-faction" class="screen">
+  <div style="display:flex;align-items:center;gap:16px;margin-bottom:8px;">
+    <h2 style="color:var(--accent2);font-size:1.8rem;">Choose Your Enemy</h2>
+    <button class="big-btn secondary" style="padding:6px 14px;font-size:0.8rem;" onclick="showScreen('title')">← Back</button>
+  </div>
+  <p style="color:var(--muted);font-style:italic;margin-bottom:4px;">Who lurks in the Shattered Valley tonight?</p>
+  <div class="faction-grid">
+    <div class="faction-card" onclick="pickFaction('undead')">
+      <div class="fc-icon">🧟</div>
+      <div class="fc-name">Undead Horde</div>
+      <div class="fc-desc">The risen dead shamble forth in vast numbers. They are slow and weak alone — but together they are relentless.</div>
+      <div class="fc-count">8–10 Undead · Terrifying aura</div>
+    </div>
+    <div class="faction-card" onclick="pickFaction('bandits')">
+      <div class="fc-icon">👺</div>
+      <div class="fc-name">Bandit Ambush</div>
+      <div class="fc-desc">Cutthroats, sellswords, and hired blades step from the shadows. Numerous and opportunistic.</div>
+      <div class="fc-count">6–8 Minions · Agile fighters</div>
+    </div>
+    <div class="faction-card" onclick="pickFaction('villain')">
+      <div class="fc-icon">🐉</div>
+      <div class="fc-name">Villain Hunt</div>
+      <div class="fc-desc">A legendary monster and its retinue stand between you and glory. One great beast — Dragon, Lich, or Vampire — with a handful of guardians.</div>
+      <div class="fc-count">1 Villain + 3–4 Minions · Leader rules</div>
+    </div>
+  </div>
+</div>
+
+<!-- THEME PICKER -->
+<div id="screen-theme" class="screen">
+  <div style="display:flex;align-items:center;gap:16px;margin-bottom:8px;">
+    <h2 style="color:var(--accent2);font-size:1.8rem;">Choose Your Battlefield</h2>
+    <button class="big-btn secondary" style="padding:6px 14px;font-size:0.8rem;" onclick="showScreen('title')">← Back</button>
+  </div>
+  <p style="color:var(--muted);font-style:italic;margin-bottom:4px;">Where does the Apocathon rage tonight?</p>
+  <div class="theme-grid" id="theme-grid"></div>
+  <div style="text-align:center;margin-top:8px;">
+    <button class="big-btn" onclick="confirmTheme()">Enter the Valley ⚔</button>
+  </div>
+</div>
+
+<!-- SETUP SCREEN -->
+<div id="screen-setup" class="screen">
+  <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;">
+    <h2 id="setup-heading">Recruit Your Warband</h2>
+    <button class="big-btn secondary" style="padding:6px 14px;font-size:0.8rem;" onclick="showScreen('title')">← Back</button>
+  </div>
+
+  <div id="both-setup" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;flex-wrap:wrap;">
+    <!-- Player 1 -->
+    <div>
+      <div class="setup-top">
+        <span class="badge p1">PLAYER 1</span>
+        <input id="wb1-name" placeholder="Warband Name..." value="Warband Alpha">
+        <input id="wb1-deity" placeholder="Patron Deity..." value="The Forgotten">
+        <button class="randomize-btn" onclick="randomizeWarband('roster1', 1)" title="Randomize entire warband">🎲 Randomize</button>
+      </div>
+      <div id="roster1" class="roster-grid"></div>
+    </div>
+    <!-- Player 2 -->
+    <div id="p2-setup-col">
+      <div class="setup-top">
+        <span class="badge p2">PLAYER 2</span>
+        <input id="wb2-name" placeholder="Warband Name..." value="Warband Omega">
+        <input id="wb2-deity" placeholder="Patron Deity..." value="The Unnamed">
+        <button class="randomize-btn" onclick="randomizeWarband('roster2', 2)" title="Randomize entire warband">🎲 Randomize</button>
+      </div>
+      <div id="roster2" class="roster-grid"></div>
+    </div>
+  </div>
+
+  <div class="setup-actions" style="margin-top:16px;">
+    <button class="big-btn" onclick="startBattle()">⚔ Begin Battle!</button>
+  </div>
+  <div class="info-box" style="margin-top:10px;">
+    Each hero gets 2 equipment items. Large items use 2 of your 4 equipment slots. Inches → grid squares (1"=1 sq).
+  </div>
+</div>
+
+<!-- BATTLE SCREEN -->
+<div id="screen-battle" class="screen">
+  <div class="turn-banner" id="turn-banner">
+    <span class="round" id="round-display">Round 1</span>
+    <span class="active-player" id="active-player-display" style="color:var(--p1)">Player 1's Turn</span>
+    <span class="orders" id="orders-display">Select a model, then choose Move or Attack</span>
+    <button class="order-btn" id="btn-move" onclick="activateOrder('move')" disabled>Move</button>
+    <button class="order-btn attack" id="btn-attack" onclick="activateOrder('attack')" disabled>Attack</button>
+    <button class="ability-btn" id="btn-ability" onclick="activateAbility()" disabled>✦ Ability</button>
+    <button class="end-turn-btn" onclick="endModelTurn()">End Model Turn ▶</button>
+  </div>
+
+  <div class="battle-layout">
+    <!-- Left sidebar: Player 1 -->
+    <div class="sidebar">
+      <div class="sidebar-title" id="p1-sidebar-title">Player 1</div>
+      <div id="sidebar-p1"></div>
+      <div class="model-detail" id="detail-left" style="display:none"></div>
+    </div>
+
+    <!-- Grid -->
+    <div class="grid-area">
+      <div id="battle-grid"></div>
+      <div class="info-box" style="margin-top:8px;font-size:0.78rem;">
+        Click your model to select → then Move/Attack button → click destination/target
+      </div>
+    </div>
+
+    <!-- Right: P2 + Log -->
+    <div>
+      <div class="sidebar">
+        <div class="sidebar-title" id="p2-sidebar-title">Player 2</div>
+        <div id="sidebar-p2"></div>
+      </div>
+      <div class="log-panel" style="margin-top:10px;">
+        <div class="log-title">BATTLE LOG</div>
+        <div class="log-entries" id="log-entries"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VICTORY SCREEN -->
+<div id="screen-victory" class="screen">
+  <h2>⚔ VICTORY ⚔</h2>
+  <div class="winner-name" id="victory-text"></div>
+  <button class="big-btn" onclick="showScreen('title')">Play Again</button>
+</div>
+
+<!-- DICE OVERLAY -->
+<div id="dice-overlay">
+  <div class="dice-label" id="dice-label">Rolling Attack!</div>
+  <div class="dice-row">
+    <div class="die" id="die1">⚀</div>
+    <div class="die" id="die2">⚀</div>
+  </div>
+  <div class="dice-result" id="dice-result"></div>
+</div>
+
+<!-- SLAIN BANNER -->
+<div id="slain-banner">
+  <div class="slain-name" id="slain-name"></div>
+  <div class="slain-line">has been slain by</div>
+  <div class="slain-killer" id="slain-killer"></div>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const MASH_DATA = {
+  Ranger:     { might:2, accuracy:3, soul:1, health:6, ability:'Sharpshooter: Shooting at a model in cover does not give -2 penalty.', abilityKey:'sharpshooter' },
+  Berserker:  { might:3, accuracy:1, soul:2, health:8, ability:'Rage: When you knock out a model, immediately take another free attack order.', abilityKey:'rage' },
+  Healer:     { might:2, accuracy:1, soul:3, health:6, ability:'Healing: Roll 1d6 + Soul. A model within 1 sq regains that much Health (self ok). Costs 1 order.', abilityKey:'healing' },
+  Knight:     { might:2, accuracy:2, soul:1, health:8, ability:'Steadfast: First time KO\'d each battle, go to 1 Health instead.', abilityKey:'steadfast' },
+  Creature:   { might:3, accuracy:1, soul:2, health:6, ability:'Frenzy: When at 3 or less Health, take an extra order each activation.', abilityKey:'frenzy' },
+  Soldier:    { might:3, accuracy:2, soul:1, health:8, ability:'Veteran: Moving out of melee does not trigger a free attack.', abilityKey:'veteran' },
+  Rogue:      { might:2, accuracy:3, soul:1, health:6, ability:'Cat Burglar: Moving vertically (climbing) costs no move distance.', abilityKey:'catburglar' },
+  'Mage (Enchanter)': { might:1, accuracy:2, soul:3, health:6, ability:'Enchanter: For 2 Orders, control the target during their next activation.', abilityKey:'enchanter' },
+  'Mage (Necromancer)': { might:1, accuracy:2, soul:3, health:6, ability:'Necromancer: For 2 Orders, summon an Undead within 4 sq.', abilityKey:'necromancer' },
+  'Mage (Druid)':  { might:1, accuracy:2, soul:3, health:6, ability:'Druid: For 2 Orders, summon a Beast within 4 sq.', abilityKey:'druid' },
+  'Mage (War Mage)': { might:1, accuracy:2, soul:3, health:6, ability:'War Mage: Magic weapons deal +2 damage.', abilityKey:'warmage' },
+};
+
+const WEAPON_DATA = {
+  'Small Blunt':        { bonus:'might/accuracy', damage:1, range:1, type:'melee' },
+  'Small Sharp':        { bonus:'accuracy', damage:1, range:1, type:'melee' },
+  'Medium Blunt':       { bonus:'might', damage:2, range:1, type:'melee' },
+  'Medium Sharp':       { bonus:'might/accuracy', damage:2, range:1, type:'melee' },
+  'Large Blunt':        { bonus:'might', damage:3, range:1, type:'melee', large:true },
+  'Large Sharp':        { bonus:'might', damage:3, range:1, type:'melee', large:true },
+  'Traditional Ranged': { bonus:'accuracy', damage:3, range:99, type:'ranged' },
+  'Mechanical Ranged':  { bonus:'accuracy', damage:4, range:99, type:'ranged' },
+  'Small Firearm':      { bonus:'accuracy', damage:4, range:99, type:'ranged' },
+  'Large Firearm':      { bonus:'accuracy', damage:5, range:99, type:'ranged', large:true },
+  'Small Magic':        { bonus:'soul', damage:2, range:99, type:'magic' },
+  'Medium Magic':       { bonus:'soul', damage:3, range:99, type:'magic' },
+  'Large Magic':        { bonus:'soul', damage:4, range:99, type:'magic', large:true },
+  'Fists/Claws':        { bonus:'might', damage:1, range:1, type:'melee' },
+};
+
+const ARMOR_DATA = {
+  'None':         { saveRoll:0 },
+  'Light Armor':  { saveRoll:5 },
+  'Medium Armor': { saveRoll:4 },
+  'Heavy Armor':  { saveRoll:3 },
+  'Shield':       { saveRoll:6, shield:true },
+};
+
+const EQUIP_OPTIONS = ['Fists/Claws','Small Blunt','Small Sharp','Medium Blunt','Medium Sharp',
+  'Large Blunt','Large Sharp','Traditional Ranged','Mechanical Ranged','Small Firearm','Large Firearm',
+  'Small Magic','Medium Magic','Large Magic','None (armor slot)'];
+const ARMOR_OPTIONS = ['None','Light Armor','Medium Armor','Heavy Armor','Shield'];
+const MASH_TYPES = Object.keys(MASH_DATA);
+
+// ============================================================
+// STATE
+// ============================================================
+let gameMode = 1; // 1=2player, 2=solo
+let state = null;
+
+// ============================================================
+// SETUP UI
+// ============================================================
+function buildSetupUI() {
+  document.getElementById('setup-heading').textContent = gameMode === 2 ? 'Recruit Your Warband (Solo vs AI)' : 'Recruit Your Warbands';
+  const p2col = document.getElementById('p2-setup-col');
+  p2col.style.display = gameMode === 2 ? 'none' : 'block';
+  buildRoster('roster1', 1);
+  if (gameMode === 1) buildRoster('roster2', 2);
+  else buildAIRoster();
+}
+
+function buildRoster(containerId, player) {
+  const c = document.getElementById(containerId);
+  c.innerHTML = '';
+  for (let i = 0; i < 6; i++) {
+    const slotId = `${containerId}-slot-${i}`;
+    const inputId = `portrait-input-${containerId}-${i}`;
+    const thumbId = `portrait-thumb-${containerId}-${i}`;
+    const slot = document.createElement('div');
+    slot.className = 'hero-slot';
+    slot.id = slotId;
+    slot.innerHTML = `
+      <h4>Hero ${i+1}</h4>
+      <div class="portrait-zone">
+        <div class="portrait-thumb" id="${thumbId}" onclick="document.getElementById('${inputId}').click()" title="Click to upload portrait">
+          <span class="portrait-emoji">${['🏹','🪓','💊','🛡️','🐾','⚔️'][i]}</span>
+        </div>
+        <label class="portrait-upload-label" onclick="document.getElementById('${inputId}').click()">Upload portrait image</label>
+        <input type="file" accept="image/*" class="portrait-input" id="${inputId}" onchange="handlePortrait(this,'${thumbId}')">
+      </div>
+      <input type="text" placeholder="Name..." value="${defaultName(i, player)}">
+      <select onchange="updateStatPreview(this)">
+        ${MASH_TYPES.map(t => `<option value="${t}">${t}</option>`).join('')}
+      </select>
+      <div class="stat-preview"></div>
+      <div class="equip-row">
+        <select title="Weapon 1">
+          ${EQUIP_OPTIONS.map((e,j)=>`<option value="${e}" ${j===0?'selected':''}>${e}</option>`).join('')}
+        </select>
+        <select title="Weapon 2 / Armor">
+          ${ARMOR_OPTIONS.map((e,j)=>`<option value="${e}" ${j===0?'selected':''}>${e}</option>`).join('')}
+        </select>
+      </div>
+    `;
+    c.appendChild(slot);
+    updateStatPreview(slot.querySelector('select'));
+  }
+}
+
+// Handle portrait image upload — store data URL on the thumb element
+function handlePortrait(input, thumbId) {
+  if (!input.files || !input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const thumb = document.getElementById(thumbId);
+    thumb.innerHTML = `<img src="${e.target.result}" class="model-img" alt="portrait">`;
+    thumb.dataset.portrait = e.target.result; // stash for warband build
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function buildAIRoster() {
+  // Auto-generate AI warband
+  state = state || {};
+  state.aiWarband = [];
+}
+
+let selectedFaction = 'undead';
+let pendingMode = 1;
+let selectedTheme = 'lava';
+
+// ── Theme definitions ──────────────────────────────────────────
+const THEMES = {
+  tundra: {
+    name: 'Frozen Tundra', icon: '❄️',
+    desc: 'Cracked ice and blizzard winds. Every step is a battle.',
+    // CSS vars
+    bg:'#0d1a2e', panel:'#0f2238', panel2:'#132d48',
+    accent:'#4ab3e8', accent2:'#a8dff0',
+    p1:'#a8dff0', p2:'#7ecfa0',
+    text:'#d8eef8', muted:'#5a8aaa', border:'#1e3a5a',
+    // grid colours
+    gridBg:'#0a1828', gridLine:'#122038', cellHover:'#152840',
+    terrain:'#2a4a6a', terrainGlyph:'#4a8aaa',
+    reachable:'#0e2e18', attackable:'#2e0e0e',
+    selected:'#1e2a14',
+    // body gradient hints
+    bodyGrad1:'#0d2040', bodyGrad2:'#091828',
+  },
+  space: {
+    name: 'Space Station', icon: '🚀',
+    desc: 'Metal corridors and starlight. Gravity is optional.',
+    bg:'#080c14', panel:'#0e1420', panel2:'#121c2e',
+    accent:'#e040fb', accent2:'#40c4ff',
+    p1:'#40c4ff', p2:'#69f0ae',
+    text:'#cce4ff', muted:'#4a6080', border:'#1a2840',
+    gridBg:'#06090f', gridLine:'#0c1020', cellHover:'#101828',
+    terrain:'#1a2240', terrainGlyph:'#304080',
+    reachable:'#0a1e10', attackable:'#1e0a20',
+    selected:'#0e1828',
+    bodyGrad1:'#0a0e20', bodyGrad2:'#060810',
+  },
+  galleon: {
+    name: 'Pirate Galleon', icon: '🏴‍☠️',
+    desc: 'Salt-soaked planks and cannon smoke. Death rides the waves.',
+    bg:'#1a1208', panel:'#241a0c', panel2:'#2e2010',
+    accent:'#d4781a', accent2:'#f0b830',
+    p1:'#f0b830', p2:'#4ab898',
+    text:'#f0e0c0', muted:'#806040', border:'#3a2810',
+    gridBg:'#140e06', gridLine:'#1e1408', cellHover:'#261a0a',
+    terrain:'#3a2808', terrainGlyph:'#604820',
+    reachable:'#0e2010', attackable:'#2e1008',
+    selected:'#2a1e08',
+    bodyGrad1:'#221608', bodyGrad2:'#160e04',
+  },
+  lava: {
+    name: 'Lava Castle', icon: '🌋',
+    desc: 'Basalt bridges over rivers of fire. The ground itself wants you dead.',
+    bg:'#1a0800', panel:'#241006', panel2:'#30140a',
+    accent:'#ff4500', accent2:'#ff8c00',
+    p1:'#ffb830', p2:'#80c080',
+    text:'#ffe0c0', muted:'#804030', border:'#401808',
+    gridBg:'#120600', gridLine:'#1e0c04', cellHover:'#280e06',
+    terrain:'#5a1e08', terrainGlyph:'#802808',
+    reachable:'#0e2008', attackable:'#3a0c04',
+    selected:'#301004',
+    bodyGrad1:'#200800', bodyGrad2:'#140400',
+  },
+  forest: {
+    name: 'Ancient Forest', icon: '🌲',
+    desc: 'Roots older than kingdoms. The trees watch everything.',
+    bg:'#0a140a', panel:'#101c10', panel2:'#162416',
+    accent:'#7ac050', accent2:'#c8e870',
+    p1:'#c8e870', p2:'#70c8c0',
+    text:'#d8f0d0', muted:'#4a6040', border:'#1e3018',
+    gridBg:'#080e08', gridLine:'#0e160e', cellHover:'#121e12',
+    terrain:'#1e3c14', terrainGlyph:'#3a6028',
+    reachable:'#0e2808', attackable:'#2a1008',
+    selected:'#162010',
+    bodyGrad1:'#0c1a0c', bodyGrad2:'#080e08',
+  },
+  desert: {
+    name: 'Desert Canyon', icon: '🏜️',
+    desc: 'Scorched sandstone and merciless sun. Only the ruthless survive.',
+    bg:'#1e1204', panel:'#281a08', panel2:'#32200c',
+    accent:'#e87830', accent2:'#f8c860',
+    p1:'#f8c860', p2:'#80c8a0',
+    text:'#f8e8c0', muted:'#806840', border:'#402810',
+    gridBg:'#180e02', gridLine:'#221408', cellHover:'#2c1a0a',
+    terrain:'#4a3010', terrainGlyph:'#705030',
+    reachable:'#101c08', attackable:'#2c1008',
+    selected:'#281808',
+    bodyGrad1:'#201404', bodyGrad2:'#160e02',
+  },
+  mushroom: {
+    name: 'Mushroom Realm', icon: '🍄',
+    desc: 'Spores drift through violet air. Nothing here follows the rules.',
+    bg:'#100818', panel:'#180e22', panel2:'#20142e',
+    accent:'#e040a0', accent2:'#c880f0',
+    p1:'#f0a0e0', p2:'#80e0b0',
+    text:'#f0d8ff', muted:'#706080', border:'#301848',
+    gridBg:'#0c0614', gridLine:'#160a20', cellHover:'#1a102a',
+    terrain:'#2e1050', terrainGlyph:'#6030a0',
+    reachable:'#0e1820', attackable:'#2a0e20',
+    selected:'#1a1030',
+    bodyGrad1:'#140a20', bodyGrad2:'#0c0618',
+  },
+};
+
+function applyTheme(key) {
+  const t = THEMES[key] || THEMES.lava;
+  const r = document.documentElement.style;
+  r.setProperty('--bg',      t.bg);
+  r.setProperty('--panel',   t.panel);
+  r.setProperty('--panel2',  t.panel2);
+  r.setProperty('--accent',  t.accent);
+  r.setProperty('--accent2', t.accent2);
+  r.setProperty('--p1',      t.p1);
+  r.setProperty('--p2',      t.p2);
+  r.setProperty('--text',    t.text);
+  r.setProperty('--muted',   t.muted);
+  r.setProperty('--border',  t.border);
+  r.setProperty('--grid-line', t.gridLine);
+  r.setProperty('--terrain', t.terrain);
+  r.setProperty('--grid-bg',      t.gridBg);
+  r.setProperty('--cell-hover',   t.cellHover);
+  r.setProperty('--terrain-glyph',t.terrainGlyph);
+  r.setProperty('--cell-reachable', t.reachable);
+  r.setProperty('--cell-attackable',t.attackable);
+  r.setProperty('--cell-selected', t.selected);
+  // Body background gradient
+  document.body.style.backgroundImage = `
+    radial-gradient(ellipse at 20% 20%, ${t.bodyGrad1} 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, ${t.bodyGrad2} 0%, transparent 60%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='80' height='80' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")`;
+}
+
+function renderThemeGrid() {
+  const grid = document.getElementById('theme-grid');
+  grid.innerHTML = '';
+  Object.entries(THEMES).forEach(([key, t]) => {
+    const card = document.createElement('div');
+    card.className = 'theme-card' + (key === selectedTheme ? ' chosen' : '');
+    card.id = `tc-${key}`;
+    card.style.background = `linear-gradient(145deg, ${t.panel2}, ${t.bg})`;
+    card.style.borderColor = key === selectedTheme ? t.accent2 : t.border;
+    card.style.color = t.text;
+    card.innerHTML = `
+      <span class="tc-icon">${t.icon}</span>
+      <div class="tc-name" style="color:${t.accent2}">${t.name}</div>
+      <div class="tc-desc">${t.desc}</div>
+    `;
+    card.onclick = () => {
+      selectedTheme = key;
+      applyTheme(key);
+      document.querySelectorAll('.theme-card').forEach(c => {
+        c.classList.remove('chosen');
+        c.style.borderColor = THEMES[c.id.replace('tc-','')].border;
+      });
+      card.classList.add('chosen');
+      card.style.borderColor = t.accent2;
+    };
+    grid.appendChild(card);
+  });
+}
+
+function confirmTheme() {
+  applyTheme(selectedTheme);
+  if (pendingMode === 1) {
+    showScreen('setup', 1);
+  } else {
+    showScreen('setup', 2);
+  }
+}
+
+function pickFaction(faction) {
+  selectedFaction = faction;
+  showScreen('theme');
+}
+
+function showScreen(id, mode) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  if (id === 'setup') {
+    gameMode = mode !== undefined ? mode : (pendingMode || 1);
+    buildSetupUI();
+  }
+  if (id === 'theme') {
+    renderThemeGrid();
+  }
+}
+
+function defaultName(i, player) {
+  const p1names = ['Iron','Storm','Ash','Crow','Forge','Thorn'];
+  const p2names = ['Dusk','Vex','Bane','Ruin','Shade','Hex'];
+  return (player === 1 ? p1names : p2names)[i];
+}
+
+function updateStatPreview(select) {
+  const mash = MASH_DATA[select.value];
+  const preview = select.parentElement.querySelector('.stat-preview');
+  if (mash && preview) {
+    preview.textContent = `M:${mash.might} A:${mash.accuracy} S:${mash.soul} HP:${mash.health}`;
+  }
+}
+
+// Random name pools for warband generation
+const RANDOM_FIRST = ['Iron','Storm','Ash','Crow','Forge','Thorn','Dusk','Hex','Ruin','Vex',
+  'Bane','Shade','Cinder','Grim','Moss','Flint','Bolt','Ember','Frost','Sage',
+  'Drake','Wren','Rook','Holt','Lorn','Skye','Reed','Vale','Dorn','Briar'];
+const RANDOM_LAST  = ['walker','blade','fang','eye','born','mark','call','wick','song','brow',
+  'mane','scar','fall','word','blood','shot','fire','crest','peak','wick'];
+const RANDOM_DEITY = ['The Forgotten','The Unnamed','The Hollow One','The Pale Star',
+  'The Shattered God','The Ember Queen','The Bone King','The Dreaming Dark',
+  'The Iron Throne','The Last Light','The Void Weaver','The Twice-Dead'];
+const RANDOM_WARBAND = ['The Shattered','The Forsaken','The Iron','The Last','The Crimson',
+  'The Hollow','The Storm','The Ember','The Pale','The Broken'];
+const RANDOM_WARBAND2 = ['Vanguard','Brotherhood','Host','Legion','Company','Circle','Order','Remnant','Pack','Conclave'];
+
+function randomizeWarband(containerId, player) {
+  const slots = document.getElementById(containerId).querySelectorAll('.hero-slot');
+  const weaponPool = EQUIP_OPTIONS.filter(e => !e.startsWith('None'));
+
+  slots.forEach(slot => {
+    // Target text inputs only (exclude the hidden file input)
+    const nameInput = slot.querySelector('input[type="text"], input:not([type])');
+    const mashSelect = slot.querySelectorAll('select')[0];
+    const weaponSelect = slot.querySelectorAll('select')[1];
+    const armorSelect = slot.querySelectorAll('select')[2];
+
+    // Random name
+    const fn = RANDOM_FIRST[Math.floor(Math.random() * RANDOM_FIRST.length)];
+    const ln = RANDOM_LAST[Math.floor(Math.random() * RANDOM_LAST.length)];
+    if (nameInput) nameInput.value = fn + ln;
+
+    // Random MASH type
+    const mashType = MASH_TYPES[Math.floor(Math.random() * MASH_TYPES.length)];
+    mashSelect.value = mashType;
+    updateStatPreview(mashSelect);
+
+    // Random weapon
+    const weapon = weaponPool[Math.floor(Math.random() * weaponPool.length)];
+    weaponSelect.value = weapon;
+
+    // Random armor
+    const armor = ARMOR_OPTIONS[Math.floor(Math.random() * ARMOR_OPTIONS.length)];
+    armorSelect.value = armor;
+  });
+
+  // Also randomize the warband name and deity inputs
+  const nameId  = player === 1 ? 'wb1-name'  : 'wb2-name';
+  const deityId = player === 1 ? 'wb1-deity' : 'wb2-deity';
+  const wbn = RANDOM_WARBAND[Math.floor(Math.random()*RANDOM_WARBAND.length)]
+            + ' ' + RANDOM_WARBAND2[Math.floor(Math.random()*RANDOM_WARBAND2.length)];
+  const deity = RANDOM_DEITY[Math.floor(Math.random()*RANDOM_DEITY.length)];
+  document.getElementById(nameId).value  = wbn;
+  document.getElementById(deityId).value = deity;
+}
+
+// ============================================================
+// BUILD WARBANDS FROM SETUP
+// ============================================================
+function buildWarband(containerId, nameInputId, deityInputId, player) {
+  const slots = document.getElementById(containerId).querySelectorAll('.hero-slot');
+  const wb = {
+    name: document.getElementById(nameInputId).value || `Warband ${player}`,
+    deity: document.getElementById(deityInputId).value || 'Unknown',
+    player,
+    heroes: []
+  };
+  slots.forEach((slot, i) => {
+    const selects = slot.querySelectorAll('select');
+    const mashType = selects[0].value;
+    const mash = MASH_DATA[mashType];
+    const weapon = selects[1].value;
+    const armor = selects[2].value;
+    // Read name from text input only (skip hidden file input)
+    const nameInput = slot.querySelector('input[type="text"], input:not([type])');
+    const heroName = nameInput?.value || `Hero ${i+1}`;
+    // Grab portrait data URL if uploaded
+    const thumbId = `portrait-thumb-${containerId}-${i}`;
+    const thumb = document.getElementById(thumbId);
+    const portrait = thumb?.dataset?.portrait || null;
+    wb.heroes.push({
+      id: `p${player}-${i}`,
+      name: heroName,
+      mashType,
+      might: mash.might,
+      accuracy: mash.accuracy,
+      soul: mash.soul,
+      maxHealth: mash.health,
+      health: mash.health,
+      ability: mash.ability,
+      abilityKey: mash.abilityKey,
+      weapon: weapon.startsWith('None') ? 'Fists/Claws' : weapon,
+      armor: armor || 'None',
+      portrait,
+      player,
+      ko: false,
+      steadfastUsed: false,
+      led: false,
+      x: -1, y: -1,
+    });
+  });
+  return wb;
+}
+
+function buildAIWarband() {
+  // Full villain/enemy stat blocks
+  const AI_MASH = {
+    Minion:    { might:1, accuracy:1, soul:0,  health:3,  abilityKey:'fighter',    ability:'Fighter: May take 3 orders if two are Attack.',          weapon:'Medium Blunt',      armor:'None',         emoji:'👺' },
+    Undead:    { might:1, accuracy:1, soul:-3, health:3,  abilityKey:'terrifying', ability:'Terrifying: Armor Score +1 when attacked within 8 sq.',   weapon:'Small Sharp',       armor:'Light Armor',  emoji:'🧟' },
+    Beast:     { might:3, accuracy:-1,soul:1,  health:6,  abilityKey:'thickskin',  ability:'Thick Skin: Armor +2 vs Ranged weapons.',                  weapon:'Medium Sharp',      armor:'None',         emoji:'🐺' },
+    Goblinoid: { might:1, accuracy:1, soul:1,  health:3,  abilityKey:'fungalblood',ability:'Fungal Blood: On KO roll +Soul; if 8+ deal 5 dmg in 6 sq.',weapon:'Small Sharp',       armor:'None',         emoji:'👹' },
+    Dragon:    { might:4, accuracy:1, soul:2,  health:16, abilityKey:'dragon',     ability:'Leader (3 orders). Acid Blood: on taking damage, Accuracy-attack attacker for 6 dmg if within 12 sq.', weapon:'Large Sharp', armor:'Heavy Armor', emoji:'🐉', isLeader:true },
+    Lich:      { might:0, accuracy:1, soul:4,  health:12, abilityKey:'lich',       ability:'Leader (3 orders). Master Necromancer: on hit with magic weapon, summon Undead within 4 sq.',         weapon:'Large Magic',  armor:'Medium Armor',emoji:'💀', isLeader:true },
+    Vampire:   { might:3, accuracy:3, soul:3,  health:14, abilityKey:'vampire',    ability:'Leader (3 orders). Hypnosis: on hit roll +Soul; if result > target HP, target acts as enemy next turn.',weapon:'Medium Sharp', armor:'Medium Armor',emoji:'🧛', isLeader:true },
+  };
+
+  const undeadNames  = ['Deathrattle','Ashbone','Greymarrow','Soulwraith','Coldrot','Voidskin','Knellborn','Hollowmaw','Tombshard','Bilewalker'];
+  const banditNames  = ['Scar','Gravel','Notch','Pike','Spit','Redhand','Dagwood','Murk','Fenn','Cutter'];
+  const minionNames  = ['Skrix','Bolg','Grak','Nox','Vorn','Drek'];
+  const villainNames = { Dragon:'Ashraveth the Undying', Lich:'Koschei the Hollow', Vampire:'Vyrenna the Pale' };
+
+  let heroes = [];
+  let name, deity;
+
+  if (selectedFaction === 'undead') {
+    const count = 8 + Math.floor(Math.random() * 3); // 8–10
+    name = 'The Risen Horde'; deity = 'The Grave-Wind';
+    for (let i = 0; i < count; i++) {
+      const m = AI_MASH.Undead;
+      heroes.push(makeAIHero(`p2-${i}`, undeadNames[i % undeadNames.length], 'Undead', m));
+    }
+
+  } else if (selectedFaction === 'bandits') {
+    const count = 6 + Math.floor(Math.random() * 3); // 6–8
+    name = 'The Ambush Company'; deity = 'The Coin-God';
+    const types = ['Minion','Minion','Goblinoid','Minion','Beast','Minion','Goblinoid','Minion'];
+    for (let i = 0; i < count; i++) {
+      const t = types[i % types.length];
+      const m = AI_MASH[t];
+      heroes.push(makeAIHero(`p2-${i}`, banditNames[i % banditNames.length], t, m));
+    }
+
+  } else { // villain
+    const villainType = ['Dragon','Lich','Vampire'][Math.floor(Math.random()*3)];
+    const vm = AI_MASH[villainType];
+    name = `The Court of ${villainNames[villainType].split(' ')[0]}`; deity = 'The Dark Throne';
+    heroes.push(makeAIHero('p2-0', villainNames[villainType], villainType, vm));
+    const minionCount = 3 + Math.floor(Math.random() * 2); // 3–4 minions
+    for (let i = 0; i < minionCount; i++) {
+      const t = villainType === 'Lich' ? 'Undead' : 'Minion';
+      heroes.push(makeAIHero(`p2-${i+1}`, minionNames[i % minionNames.length], t, AI_MASH[t]));
+    }
+  }
+
+  return { name, deity, player:2, heroes };
+}
+
+function makeAIHero(id, name, mashType, m) {
+  return {
+    id, name, mashType,
+    might: m.might, accuracy: m.accuracy, soul: m.soul,
+    maxHealth: m.health, health: m.health,
+    ability: m.ability, abilityKey: m.abilityKey,
+    weapon: m.weapon, armor: m.armor,
+    isLeader: m.isLeader || false,
+    player: 2, ko: false, steadfastUsed: false, led: false, x:-1, y:-1,
+  };
+}
+
+// ============================================================
+// BATTLE START
+// ============================================================
+const GRID_W = 16, GRID_H = 12;
+
+function startBattle() {
+  const wb1 = buildWarband('roster1','wb1-name','wb1-deity',1);
+  const wb2 = gameMode === 2 ? buildAIWarband() : buildWarband('roster2','wb2-name','wb2-deity',2);
+
+  // Place models
+  placeModels(wb1.heroes, 0, 'left');
+  placeModels(wb2.heroes, GRID_W-1, 'right');
+
+  // Generate terrain
+  const { terrain, archetype } = generateTerrain();
+
+  state = {
+    wb1, wb2,
+    terrain,
+    round: 1,
+    activePlayer: 1,
+    selectedModel: null,
+    orderMode: null,
+    ordersLeft: 2,
+    ledThisTurn: new Set(),
+    log: [],
+    gameMode,
+  };
+
+  buildBattleUI();
+  showScreen('battle');
+  addLog('⚔ The Apocathon begins!', 'sys');
+  addLog(`${wb1.name} vs ${wb2.name}`, 'sys');
+  addLog(`⛰ Battlefield: ${archetype.charAt(0).toUpperCase()+archetype.slice(1)}`, 'sys');
+  rollForFirst();
+}
+
+function placeModels(heroes, startX, side) {
+  // side: 'left' places on col 0-1, 'right' on cols GRID_W-2 to GRID_W-1
+  // Spread across two columns if needed
+  heroes.forEach((h, i) => {
+    const col = (side === 'right') ? GRID_W - 1 - (i >= GRID_H - 1 ? 1 : 0)
+                                   : (i >= GRID_H - 1 ? 1 : 0);
+    const row = i % (GRID_H - 1);
+    h.x = col;
+    h.y = Math.min(GRID_H - 1, 1 + row);
+  });
+}
+
+function generateTerrain() {
+  const t = new Set();
+  const SAFE_LEFT  = 2;
+  const SAFE_RIGHT = GRID_W - 3;
+
+  function addCluster(cx, cy, size) {
+    const tries = size * 4;
+    const placed = new Set([`${cx},${cy}`]);
+    t.add(`${cx},${cy}`);
+    for (let i = 0; i < tries && placed.size < size; i++) {
+      const src = [...placed][Math.floor(Math.random() * placed.size)];
+      const [sx, sy] = src.split(',').map(Number);
+      const dirs = [{dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1}];
+      const {dx,dy} = dirs[Math.floor(Math.random()*dirs.length)];
+      const nx = sx+dx, ny = sy+dy;
+      if (nx < SAFE_LEFT || nx > SAFE_RIGHT || ny < 0 || ny >= GRID_H) continue;
+      const key = `${nx},${ny}`;
+      if (!placed.has(key)) { placed.add(key); t.add(key); }
+    }
+  }
+
+  const archetypes = ['ruins', 'forest', 'gorge', 'river', 'scattered'];
+  const archetype = archetypes[Math.floor(Math.random() * archetypes.length)];
+
+  if (archetype === 'ruins') {
+    const pts = [[4,2],[4,6],[8,1],[8,9],[10,4],[12,2],[12,7],[6,4]];
+    pts.forEach(([x,y]) => addCluster(x, y, 2 + Math.floor(Math.random()*3)));
+
+  } else if (archetype === 'forest') {
+    for (let i = 0; i < 5; i++) {
+      const cx = SAFE_LEFT + 2 + Math.floor(Math.random() * (SAFE_RIGHT - SAFE_LEFT - 2));
+      const cy = 1 + Math.floor(Math.random() * (GRID_H - 2));
+      addCluster(cx, cy, 3 + Math.floor(Math.random()*4));
+    }
+
+  } else if (archetype === 'gorge') {
+    const midX = Math.floor(GRID_W / 2);
+    for (let y = 0; y < GRID_H; y++) {
+      if (Math.random() < 0.65) {
+        t.add(`${midX},${y}`);
+        if (Math.random() < 0.4) t.add(`${midX+1},${y}`);
+      }
+    }
+    for (let i = 0; i < 3; i++) {
+      addCluster(SAFE_LEFT + 1 + Math.floor(Math.random()*3), 1 + Math.floor(Math.random()*(GRID_H-2)), 2);
+      addCluster(SAFE_RIGHT - 1 - Math.floor(Math.random()*3), 1 + Math.floor(Math.random()*(GRID_H-2)), 2);
+    }
+
+  } else if (archetype === 'river') {
+    let y = Math.floor(GRID_H / 2) + Math.floor(Math.random()*3) - 1;
+    for (let x = SAFE_LEFT; x <= SAFE_RIGHT; x++) {
+      if (y >= 1 && y < GRID_H) t.add(`${x},${y}`);
+      if (Math.random() < 0.4 && y+1 < GRID_H) t.add(`${x},${y+1}`);
+      const drift = Math.random();
+      if (drift < 0.3 && y > 1) y--;
+      else if (drift > 0.7 && y < GRID_H-2) y++;
+    }
+    for (let i = 0; i < 4; i++) {
+      const cx = SAFE_LEFT + 2 + Math.floor(Math.random()*(SAFE_RIGHT - SAFE_LEFT - 4));
+      addCluster(cx, 1 + Math.floor(Math.random()*3), 2);
+      addCluster(cx, GRID_H-2 - Math.floor(Math.random()*3), 2);
+    }
+
+  } else {
+    // scattered
+    const count = 14 + Math.floor(Math.random() * 8);
+    for (let i = 0; i < count; i++) {
+      const cx = SAFE_LEFT + Math.floor(Math.random() * (SAFE_RIGHT - SAFE_LEFT));
+      const cy = 1 + Math.floor(Math.random() * (GRID_H - 2));
+      addCluster(cx, cy, 1 + Math.floor(Math.random()*2));
+    }
+  }
+
+  return { terrain: t, archetype };
+}
+
+function rollForFirst() {
+  const r1 = roll(2), r2 = roll(2);
+  addLog(`Initiative: P1 rolls ${r1}, P2 rolls ${r2}`, 'info');
+  state.activePlayer = (r1 >= r2) ? 1 : 2;
+  addLog(`${getActiveWB().name} goes first!`, 'sys');
+  refreshUI();
+}
+
+// ============================================================
+// BUILD BATTLE UI
+// ============================================================
+function buildBattleUI() {
+  document.getElementById('p1-sidebar-title').textContent = state.wb1.name;
+  document.getElementById('p2-sidebar-title').textContent = state.wb2.name;
+  buildGrid();
+  refreshUI();
+}
+
+function buildGrid() {
+  const grid = document.getElementById('battle-grid');
+  grid.style.gridTemplateColumns = `repeat(${GRID_W}, 44px)`;
+  grid.innerHTML = '';
+  for (let y = 0; y < GRID_H; y++) {
+    for (let x = 0; x < GRID_W; x++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.id = `cell-${x}-${y}`;
+      cell.dataset.x = x;
+      cell.dataset.y = y;
+      if (state.terrain.has(`${x},${y}`)) {
+        cell.classList.add('terrain');
+        cell.innerHTML = '<span style="font-size:1.2rem;color:#8d6e63;">■</span>';
+      } else {
+        cell.onclick = () => cellClick(x, y);
+      }
+      grid.appendChild(cell);
+    }
+  }
+}
+
+// ============================================================
+// REFRESH UI
+// ============================================================
+function refreshUI() {
+  renderGrid();
+  renderSidebars();
+  renderTurnBanner();
+}
+
+function renderGrid() {
+  // Clear highlights
+  document.querySelectorAll('.cell').forEach(c => {
+    if (!c.classList.contains('terrain')) {
+      c.classList.remove('reachable','attackable','selected-cell');
+      // Remove model tokens
+      const existing = c.querySelector('.model');
+      if (existing) existing.remove();
+    }
+  });
+
+  // Place models — KO'd models are not rendered (they leave the field)
+  allHeroes().forEach(h => {
+    if (h.x < 0 || h.y < 0) return;
+    if (h.ko) return; // removed from board on death
+    const cell = document.getElementById(`cell-${h.x}-${h.y}`);
+    if (!cell) return;
+    const m = document.createElement('div');
+    m.className = `model p${h.player}${state.selectedModel?.id === h.id ? ' selected' : ''}`;
+    if (h.portrait) {
+      const img = document.createElement('img');
+      img.src = h.portrait;
+      img.className = 'model-img';
+      img.alt = h.name;
+      m.appendChild(img);
+    } else {
+      m.textContent = heroEmoji(h);
+    }
+    m.title = `${h.name} (${h.mashType}) HP:${h.health}/${h.maxHealth}`;
+    m.onclick = (e) => { e.stopPropagation(); modelClick(h); };
+    cell.appendChild(m);
+  });
+
+  // Highlight reachable/attackable cells
+  if (state.selectedModel && !state.selectedModel.ko) {
+    if (state.orderMode === 'move') {
+      getReachable(state.selectedModel).forEach(({x,y}) => {
+        const c = document.getElementById(`cell-${x}-${y}`);
+        if (c && !c.classList.contains('terrain')) c.classList.add('reachable');
+      });
+    } else if (state.orderMode === 'attack') {
+      getAttackable(state.selectedModel).forEach(h => {
+        const c = document.getElementById(`cell-${h.x}-${h.y}`);
+        if (c) c.classList.add('attackable');
+      });
+    }
+    const sc = document.getElementById(`cell-${state.selectedModel.x}-${state.selectedModel.y}`);
+    if (sc) sc.classList.add('selected-cell');
+  }
+}
+
+function renderSidebars() {
+  renderSide('sidebar-p1', state.wb1.heroes);
+  renderSide('sidebar-p2', state.wb2.heroes);
+  renderModelDetail();
+}
+
+function renderSide(containerId, heroes) {
+  const c = document.getElementById(containerId);
+  c.innerHTML = '';
+  heroes.forEach(h => {
+    const div = document.createElement('div');
+    div.className = `mini-card${h.ko ? ' ko' : ''}${state.selectedModel?.id === h.id ? ' selected' : ''}`;
+    const hpPct = Math.max(0, h.health / h.maxHealth * 100);
+    const hpColor = hpPct > 50 ? '#4caf50' : hpPct > 25 ? '#ff9800' : '#f44336';
+    const iconHtml = h.portrait
+      ? `<img src="${h.portrait}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:4px;border:1px solid var(--border);" alt="">`
+      : `<span style="margin-right:4px;">${heroEmoji(h)}</span>`;
+    div.innerHTML = `
+      <div class="name">${iconHtml}${h.name}${h.ko ? ' ☠' : ''}${h.led ? ' ✓' : ''}</div>
+      <div class="mash">${h.mashType.substring(0,3).toUpperCase()} | ${h.health}/${h.maxHealth} HP</div>
+      <div class="hp-bar"><div class="hp-fill" style="width:${hpPct}%;background:${hpColor}"></div></div>
+    `;
+    if (!h.ko) div.onclick = () => modelClick(h);
+    c.appendChild(div);
+  });
+}
+
+function renderModelDetail() {
+  const m = state.selectedModel;
+  const d = document.getElementById('detail-left');
+  if (!m) { d.style.display='none'; return; }
+  d.style.display='block';
+  const wd = WEAPON_DATA[m.weapon] || WEAPON_DATA['Fists/Claws'];
+  const ad = ARMOR_DATA[m.armor] || ARMOR_DATA['None'];
+  const iconHtml = m.portrait
+    ? `<img src="${m.portrait}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--accent2);float:right;margin:0 0 6px 8px;" alt="">`
+    : `<span style="font-size:1.8rem;float:right;">${heroEmoji(m)}</span>`;
+  d.innerHTML = `
+    ${iconHtml}
+    <div class="dname">${m.name}</div>
+    <div class="dstats">M:${m.might} A:${m.accuracy} S:${m.soul} | HP:${m.health}/${m.maxHealth}</div>
+    <div class="dequip">⚔ ${m.weapon} (${wd.damage} dmg, range:${wd.range===99?'∞':wd.range})</div>
+    <div class="dequip">🛡 ${m.armor}${ad.saveRoll?` (${ad.saveRoll}+ save)`:''}</div>
+    <div class="dability">${m.ability}</div>
+    <div style="margin-top:4px;font-size:0.78rem;color:var(--muted);clear:both;">Orders left: ${state.ordersLeft}</div>
+  `;
+}
+
+function renderTurnBanner() {
+  const wb = getActiveWB();
+  const apEl = document.getElementById('active-player-display');
+  apEl.textContent = `${wb.name} — ${state.activePlayer === 1 ? 'Player 1' : (state.gameMode===2?'AI':' Player 2')}`;
+  apEl.style.color = state.activePlayer === 1 ? 'var(--p1)' : 'var(--p2)';
+  document.getElementById('round-display').textContent = `Round ${state.round}`;
+
+  const hasSel = !!state.selectedModel && !state.selectedModel.ko && state.selectedModel.player === state.activePlayer;
+  const ordLeft = state.ordersLeft;
+
+  document.getElementById('btn-move').disabled = !hasSel || ordLeft <= 0 || state.orderMode !== null;
+  document.getElementById('btn-attack').disabled = !hasSel || ordLeft <= 0 || state.orderMode !== null;
+
+  const abilityBtn = document.getElementById('btn-ability');
+  abilityBtn.disabled = !hasSel || ordLeft <= 0 || !canUseAbility(state.selectedModel) || state.orderMode !== null;
+
+  let msg = 'Select one of your models to lead.';
+  if (state.selectedModel && state.selectedModel.player === state.activePlayer) {
+    if (state.orderMode === 'move') msg = 'Click a green square to move there.';
+    else if (state.orderMode === 'attack') msg = 'Click a red enemy to attack!';
+    else msg = `${state.selectedModel.name} selected — ${ordLeft} order(s) left. Choose Move or Attack.`;
+  }
+  document.getElementById('orders-display').textContent = msg;
+}
+
+// ============================================================
+// INTERACTION
+// ============================================================
+function modelClick(h) {
+  if (state.orderMode) { cellClick(h.x, h.y); return; }
+  if (h.player !== state.activePlayer) return;
+  if (h.ko) return;
+  if (h.led && h.player === state.activePlayer && state.ordersLeft <= 0) {
+    addLog(`${h.name} has already been led this round.`, 'miss');
+    return;
+  }
+
+  // Selecting a new model
+  if (state.selectedModel?.id !== h.id) {
+    state.selectedModel = h;
+    state.ordersLeft = ordersForModel(h);
+    state.orderMode = null;
+  }
+  refreshUI();
+}
+
+function ordersForModel(h) {
+  let orders = 2;
+  if (h.led) return 0;
+  // Enchanted models lose their activation
+  if (h.enchanted) {
+    h.enchanted = false; // clear after use
+    addLog(`🔮 ${h.name} is under an enchantment and loses their activation!`, 'sys');
+    return 0;
+  }
+  if (h.abilityKey === 'frenzy' && h.health <= 3) orders = 3;
+  if (h.isLeader) orders = 3;
+  return orders;
+}
+
+function activateOrder(type) {
+  if (!state.selectedModel || state.ordersLeft <= 0) return;
+  state.orderMode = type;
+  refreshUI();
+}
+
+function canUseAbility(h) {
+  if (!h) return false;
+  // All mage paths have usable abilities; healer too
+  return ['healing','enchanter','necromancer','druid','warmage'].includes(h.abilityKey);
+}
+
+function activateAbility() {
+  const h = state.selectedModel;
+  if (!h || !canUseAbility(h)) return;
+
+  // ----- HEALING -----
+  if (h.abilityKey === 'healing') {
+    if (state.ordersLeft < 1) { addLog('Not enough orders for Healing.', 'miss'); return; }
+    // Target the most-wounded ally (including self)
+    const allies = allHeroes().filter(a => a.player === h.player && !a.ko);
+    const target = allies.reduce((worst, a) => (a.health < worst.health ? a : worst), h);
+    const amount = roll(1) + h.soul;
+    target.health = Math.min(target.maxHealth, target.health + amount);
+    addLog(`💊 ${h.name} heals ${target.name} for ${amount} HP! (${target.health}/${target.maxHealth})`, 'heal');
+    spendOrder();
+    return;
+  }
+
+  // ----- WAR MAGE: already passive, but give a double-attack order -----
+  if (h.abilityKey === 'warmage') {
+    if (state.ordersLeft < 1) { addLog('Not enough orders.', 'miss'); return; }
+    addLog(`⚡ ${h.name} channels War Magic — attack now deals +2 damage!`, 'sys');
+    // War Mage bonus is applied in doAttack passively; just activate attack mode
+    state.orderMode = 'attack';
+    refreshUI();
+    return;
+  }
+
+  // ----- NECROMANCER: summon an Undead within 4 sq -----
+  if (h.abilityKey === 'necromancer') {
+    if (state.ordersLeft < 2) { addLog('Necromancer needs 2 orders to summon.', 'miss'); return; }
+    const placed = summonUnit(h, 'Undead', '🧟');
+    if (placed) {
+      addLog(`💀 ${h.name} raises an Undead at (${placed.x},${placed.y})!`, 'sys');
+      state.ordersLeft -= 2;
+      if (state.ordersLeft <= 0 && state.selectedModel) state.selectedModel.led = true;
+      state.orderMode = null;
+      refreshUI();
+    }
+    return;
+  }
+
+  // ----- DRUID: summon a Beast within 4 sq -----
+  if (h.abilityKey === 'druid') {
+    if (state.ordersLeft < 2) { addLog('Druid needs 2 orders to summon.', 'miss'); return; }
+    const placed = summonUnit(h, 'Beast', '🐺');
+    if (placed) {
+      addLog(`🌿 ${h.name} summons a Beast at (${placed.x},${placed.y})!`, 'sys');
+      state.ordersLeft -= 2;
+      if (state.ordersLeft <= 0 && state.selectedModel) state.selectedModel.led = true;
+      state.orderMode = null;
+      refreshUI();
+    }
+    return;
+  }
+
+  // ----- ENCHANTER: mark the nearest visible enemy for charm -----
+  if (h.abilityKey === 'enchanter') {
+    if (state.ordersLeft < 2) { addLog('Enchanter needs 2 orders to charm.', 'miss'); return; }
+    const enemies = allHeroes().filter(e => e.player !== h.player && !e.ko && hasLOS(h, e));
+    if (enemies.length === 0) { addLog('No visible enemies to enchant!', 'miss'); return; }
+    const target = enemies[0];
+    target.enchanted = true; // flag; charmed units skip their next activation
+    addLog(`🔮 ${h.name} enchants ${target.name}! They lose their next activation.`, 'sys');
+    state.ordersLeft -= 2;
+    if (state.ordersLeft <= 0 && state.selectedModel) state.selectedModel.led = true;
+    state.orderMode = null;
+    refreshUI();
+    return;
+  }
+}
+
+// Summon a new friendly unit within 4 sq of caster, on an empty non-terrain cell
+function summonUnit(caster, type, emoji) {
+  const SUMMON_STATS = {
+    Undead: { might:1, accuracy:1, soul:-3, health:3, abilityKey:'terrifying', ability:'Terrifying: Armor +1 within 8 sq.', weapon:'Small Sharp', armor:'Light Armor' },
+    Beast:  { might:3, accuracy:-1, soul:1, health:6, abilityKey:'thickskin',  ability:'Thick Skin: Armor +2 vs Ranged.', weapon:'Medium Sharp', armor:'None' },
+  };
+  const m = SUMMON_STATS[type];
+  // Find nearest empty cell within 4 sq
+  for (let r = 1; r <= 4; r++) {
+    for (let dy = -r; dy <= r; dy++) {
+      for (let dx = -r; dx <= r; dx++) {
+        if (Math.abs(dx)+Math.abs(dy) !== r) continue;
+        const nx = caster.x+dx, ny = caster.y+dy;
+        if (nx<0||ny<0||nx>=GRID_W||ny>=GRID_H) continue;
+        if (state.terrain.has(`${nx},${ny}`)) continue;
+        if (allHeroes().find(a => a.x===nx && a.y===ny && !a.ko)) continue;
+        const summonId = `summon-${Date.now()}-${Math.random()}`;
+        const unit = {
+          id: summonId, name: type, mashType: type,
+          might: m.might, accuracy: m.accuracy, soul: m.soul,
+          maxHealth: m.health, health: m.health,
+          ability: m.ability, abilityKey: m.abilityKey,
+          weapon: m.weapon, armor: m.armor,
+          player: caster.player, ko: false, steadfastUsed: false, led: true, // led=true so they don't act this round
+          x: nx, y: ny,
+        };
+        if (caster.player === 1) state.wb1.heroes.push(unit);
+        else state.wb2.heroes.push(unit);
+        return unit;
+      }
+    }
+  }
+  addLog('No space to summon nearby!', 'miss');
+  return null;
+}
+
+function cellClick(x, y) {
+  if (!state.selectedModel || state.selectedModel.player !== state.activePlayer) return;
+  if (state.orderMode === 'move') doMove(x, y);
+  else if (state.orderMode === 'attack') {
+    // find enemy at this cell
+    const target = allHeroes().find(h => h.x === x && h.y === y && h.player !== state.activePlayer && !h.ko);
+    if (target) doAttack(state.selectedModel, target);
+    else { state.orderMode = null; refreshUI(); }
+  }
+}
+
+// ============================================================
+// MOVE
+// ============================================================
+function getReachable(h) {
+  const range = 6;
+  const cells = [];
+  for (let dy = -range; dy <= range; dy++) {
+    for (let dx = -range; dx <= range; dx++) {
+      if (Math.abs(dx)+Math.abs(dy) > range) continue;
+      const nx = h.x + dx, ny = h.y + dy;
+      if (nx < 0 || ny < 0 || nx >= GRID_W || ny >= GRID_H) continue;
+      if (state.terrain.has(`${nx},${ny}`)) continue;
+      if (allHeroes().find(a => a.x===nx && a.y===ny && !a.ko)) continue;
+      if (dx===0 && dy===0) continue;
+      cells.push({x:nx, y:ny});
+    }
+  }
+  return cells;
+}
+
+function doMove(tx, ty) {
+  const h = state.selectedModel;
+  const reachable = getReachable(h);
+  if (!reachable.find(c => c.x===tx && c.y===ty)) {
+    addLog('Cannot reach that square.', 'miss');
+    state.orderMode = null;
+    refreshUI();
+    return;
+  }
+
+  // Check if moving out of melee (free attack from adjacent enemy)
+  if (h.abilityKey !== 'veteran') {
+    const adjEnemies = allHeroes().filter(e => e.player !== h.player && !e.ko && dist(h, e) <= 1);
+    adjEnemies.forEach(e => {
+      addLog(`${e.name} makes a free attack as ${h.name} moves away!`, 'info');
+      doAttack(e, h, true);
+    });
+  }
+
+  addLog(`${h.name} moves to (${tx},${ty}).`, 'info');
+  h.x = tx;
+  h.y = ty;
+  spendOrder();
+}
+
+// ============================================================
+// ATTACK
+// ============================================================
+function getAttackable(h) {
+  const wd = WEAPON_DATA[h.weapon] || WEAPON_DATA['Fists/Claws'];
+  return allHeroes().filter(e => {
+    if (e.player === h.player || e.ko) return false;
+    if (wd.range === 1) return dist(h, e) <= 1;
+    return hasLOS(h, e);
+  });
+}
+
+function hasLOS(a, b) {
+  // Bresenham line; if terrain blocks, return false
+  let x0=a.x, y0=a.y, x1=b.x, y1=b.y;
+  const dx=Math.abs(x1-x0), dy=Math.abs(y1-y0);
+  const sx=x0<x1?1:-1, sy=y0<y1?1:-1;
+  let err=dx-dy;
+  while (true) {
+    if (x0===x1 && y0===y1) break;
+    if ((x0!==a.x||y0!==a.y) && (x0!==b.x||y0!==b.y) && state.terrain.has(`${x0},${y0}`)) return false;
+    const e2=2*err;
+    if (e2>-dy) { err-=dy; x0+=sx; }
+    if (e2<dx) { err+=dx; y0+=sy; }
+  }
+  return true;
+}
+
+function isInCover(attacker, target) {
+  // target in cover if adjacent to terrain
+  const adj = [{x:target.x-1,y:target.y},{x:target.x+1,y:target.y},{x:target.x,y:target.y-1},{x:target.x,y:target.y+1}];
+  return adj.some(c => state.terrain.has(`${c.x},${c.y}`));
+}
+
+function doAttack(attacker, target, freeAttack=false) {
+  const wd = WEAPON_DATA[attacker.weapon] || WEAPON_DATA['Fists/Claws'];
+  const ad = ARMOR_DATA[target.armor] || ARMOR_DATA['None'];
+  
+  let bonusStat = 0;
+  const bonusKey = wd.bonus;
+  if (bonusKey === 'might') bonusStat = attacker.might;
+  else if (bonusKey === 'accuracy') bonusStat = attacker.accuracy;
+  else if (bonusKey === 'soul') bonusStat = attacker.soul;
+  else if (bonusKey === 'might/accuracy') bonusStat = Math.max(attacker.might, attacker.accuracy);
+
+  // Cover penalty for ranged (-2 to hit)
+  let coverPenalty = 0;
+  if (wd.type !== 'melee' && isInCover(attacker, target) && attacker.abilityKey !== 'sharpshooter') {
+    coverPenalty = -2;
+  }
+
+  // Roll the two dice individually for display
+  const d1 = Math.floor(Math.random()*6)+1;
+  const d2 = Math.floor(Math.random()*6)+1;
+  const rawRoll = d1 + d2;
+  const attackRoll = rawRoll + bonusStat + coverPenalty;
+  const hit = attackRoll >= 9;
+
+  const statTag = bonusKey === 'might/accuracy' ? `max(M,A)` : bonusKey.charAt(0).toUpperCase()+bonusKey.slice(1);
+  const bonusStr = bonusStat >= 0 ? `+${bonusStat}` : `${bonusStat}`;
+  const penStr = coverPenalty !== 0 ? ` (cover ${coverPenalty})` : '';
+  const diceLabel = `${heroEmoji(attacker)} ${attacker.name} attacks ${heroEmoji(target)} ${target.name}`;
+  const resultHTML = `
+    <div>Dice: ${d1}+${d2} = ${rawRoll} &nbsp;|&nbsp; ${statTag}: ${bonusStr}${penStr} &nbsp;→&nbsp; <span class="total">${attackRoll}</span> vs 9</div>
+    <div>${hit ? '<span class="hit-word">⚔ HIT!</span>' : '<span class="miss-word">✗ MISS</span>'}</div>
+  `;
+
+  // Resolve combat logic, logging messages
+  function resolveAttack() {
+    let damage = 0;
+    let saved = false;
+
+    if (hit) {
+      let bonus = 0;
+      if (wd.type === 'magic' && attacker.abilityKey === 'warmage') bonus = 2;
+      damage = wd.damage + bonus;
+
+      if (ad.saveRoll > 0) {
+        let saveBonus = 0;
+        if (ad.shield) saveBonus = 1;
+        const saveRoll = roll(1) + saveBonus;
+        if (saveRoll >= ad.saveRoll) {
+          saved = true;
+          addLog(`${attacker.name} hits ${target.name}! (${attackRoll}) — Save! ${target.name} blocks.`, 'miss');
+        }
+      }
+
+      if (!saved) {
+        if (target.abilityKey === 'thickskin' && wd.type === 'ranged') {
+          damage = Math.max(0, damage - 2);
+          addLog(`${target.name}'s Thick Skin reduces damage by 2!`, 'info');
+        }
+        target.health -= damage;
+        addLog(`${attacker.name} hits ${target.name} for ${damage} dmg! (Roll: ${attackRoll}) ${target.health}/${target.maxHealth} HP.`, 'hit');
+
+        if (target.health <= 0) {
+          if (target.abilityKey === 'steadfast' && !target.steadfastUsed) {
+            target.health = 1;
+            target.steadfastUsed = true;
+            addLog(`${target.name}'s Steadfast! Survives at 1 HP!`, 'ko-msg');
+          } else {
+            target.ko = true;
+            target.health = 0;
+            addLog(`☠ ${target.name} is KNOCKED OUT!`, 'ko-msg');
+            showSlainBanner(target.name, attacker.name);
+
+            if (attacker.abilityKey === 'rage' && !freeAttack) {
+              addLog(`${attacker.name} RAGES! Taking a free attack!`, 'sys');
+              const nextEnemy = allHeroes().find(e => e.player !== attacker.player && !e.ko);
+              if (nextEnemy && dist(attacker, nextEnemy) <= 1) {
+                doAttack(attacker, nextEnemy, true);
+                return; // doAttack will call spendOrder
+              }
+            }
+
+            checkVictory();
+          }
+        }
+      }
+    } else {
+      addLog(`${attacker.name} attacks ${target.name} — MISS! (Roll: ${attackRoll}, needs 9)`, 'miss');
+    }
+
+    if (!freeAttack) {
+      state.orderMode = null;
+      spendOrder();
+    }
+    refreshUI();
+  }
+
+  // For free attacks (e.g. rage chain, disengage) skip the animation to avoid overlay stacking
+  if (freeAttack) {
+    resolveAttack();
+  } else {
+    showDiceRoll(d1, d2, diceLabel, resultHTML, resolveAttack);
+  }
+}
+
+function spendOrder() {
+  state.ordersLeft--;
+  if (state.ordersLeft <= 0 && state.selectedModel) {
+    state.selectedModel.led = true;
+  }
+  state.orderMode = null;
+
+  // Check if AI turn
+  if (state.activePlayer === 2 && state.gameMode === 2) {
+    setTimeout(aiTakeOrder, 2800);
+  }
+
+  refreshUI();
+}
+
+// ============================================================
+// END MODEL TURN / ROUND
+// ============================================================
+function endModelTurn() {
+  if (state.selectedModel) {
+    state.selectedModel.led = true;
+  }
+  state.selectedModel = null;
+  state.orderMode = null;
+  state.ordersLeft = 0;
+
+  // Check if all alive models of active player are led
+  const activeLiving = getActiveWB().heroes.filter(h => !h.ko);
+  const allLed = activeLiving.every(h => h.led);
+
+  if (allLed) switchPlayer();
+  refreshUI();
+
+  if (state.gameMode === 2 && state.activePlayer === 2) {
+    setTimeout(aiTakeTurn, 2000);
+  }
+}
+
+function switchPlayer() {
+  // Check if opponent also has all led
+  const otherWB = state.activePlayer === 1 ? state.wb2 : state.wb1;
+  const otherLiving = otherWB.heroes.filter(h => !h.ko);
+  const otherAllLed = otherLiving.every(h => h.led);
+
+  state.activePlayer = state.activePlayer === 1 ? 2 : 1;
+
+  // If both sides led, new round
+  const newActiveLiving = getActiveWB().heroes.filter(h => !h.ko);
+  const newAllLed = newActiveLiving.every(h => h.led);
+  if (otherAllLed && newAllLed) {
+    newRound();
+    return;
+  }
+
+  state.selectedModel = null;
+  addLog(`--- ${getActiveWB().name}'s turn ---`, 'sys');
+  refreshUI();
+
+  if (state.gameMode === 2 && state.activePlayer === 2) {
+    setTimeout(aiTakeTurn, 2000);
+  }
+}
+
+function newRound() {
+  state.round++;
+  // Reset led
+  allHeroes().forEach(h => h.led = false);
+  // Roll for first
+  const r1 = roll(2), r2 = roll(2);
+  state.activePlayer = r1 >= r2 ? 1 : 2;
+  state.selectedModel = null;
+  state.orderMode = null;
+  addLog(`=== Round ${state.round} begins! ${getActiveWB().name} goes first! ===`, 'sys');
+  refreshUI();
+
+  if (state.gameMode === 2 && state.activePlayer === 2) {
+    setTimeout(aiTakeTurn, 2200);
+  }
+}
+
+// ============================================================
+// AI
+// ============================================================
+function aiTakeTurn() {
+  const wb2 = state.wb2;
+  const living = wb2.heroes.filter(h => !h.ko && !h.led);
+  if (living.length === 0) { switchPlayer(); return; }
+
+  // Leaders go last so minions can screen for them
+  living.sort((a, b) => (b.isLeader ? -1 : 0) - (a.isLeader ? -1 : 0));
+  const h = living[0];
+  state.selectedModel = h;
+  state.ordersLeft = ordersForModel(h);
+
+  // Enchanted: skip immediately
+  if (state.ordersLeft === 0) {
+    h.led = true;
+    state.selectedModel = null;
+    setTimeout(aiTakeTurn, 2200);
+    return;
+  }
+
+  addLog(`${heroEmoji(h)} ${h.name} stirs...`, 'sys');
+  setTimeout(aiTakeOrder, 1000);
+}
+
+function aiTakeOrder() {
+  const h = state.selectedModel;
+  if (!h || h.ko) { endModelTurn(); return; }
+  if (state.ordersLeft <= 0) { endModelTurn(); return; }
+
+  const enemies = state.wb1.heroes.filter(e => !e.ko);
+  if (enemies.length === 0) return;
+
+  const attackable = getAttackable(h);
+
+  // ---- DECISION LOGIC ----
+  // 1. Always attack if possible
+  if (attackable.length > 0) {
+    // Prefer lowest-HP target
+    const target = attackable.reduce((a, b) => a.health < b.health ? a : b);
+    addLog(`${heroEmoji(h)} ${h.name} attacks!`, 'sys');
+    doAttack(h, target);
+    return;
+  }
+
+  const reachable = getReachable(h);
+  const hpRatio = h.health / h.maxHealth;
+
+  // 2. Defensive: if hurt (< 50% HP) and near terrain cover, hold position (move toward cover)
+  if (hpRatio < 0.5) {
+    const coverCells = reachable.filter(c => {
+      const adj = [{x:c.x-1,y:c.y},{x:c.x+1,y:c.y},{x:c.x,y:c.y-1},{x:c.x,y:c.y+1}];
+      return adj.some(a => state.terrain.has(`${a.x},${a.y}`));
+    });
+    if (coverCells.length > 0) {
+      // Move to cover cell closest to an enemy (defensive but positioned)
+      const closest = enemies.reduce((a, b) => dist(h, a) < dist(h, b) ? a : b);
+      const best = coverCells.reduce((a, b) =>
+        dist(a, closest) < dist(b, closest) ? a : b
+      );
+      h.x = best.x; h.y = best.y;
+      addLog(`${heroEmoji(h)} ${h.name} retreats to cover at (${best.x},${best.y}).`, 'info');
+      spendOrder();
+      return;
+    }
+  }
+
+  // 3. Leaders hang back until enemies are close (within 6 sq)
+  const closest = enemies.reduce((a, b) => dist(h, a) < dist(h, b) ? a : b);
+  if (h.isLeader && dist(h, closest) > 6) {
+    // Advance slowly — move only 1/3 of the way
+    if (reachable.length > 0) {
+      const sorted = reachable.slice().sort((a, b) =>
+        (dist(a, closest) - dist(b, closest))
+      );
+      // Pick the cell that moves closer but not too close (leave gap of 4)
+      const cautious = sorted.find(c => dist(c, closest) >= 4) || sorted[0];
+      h.x = cautious.x; h.y = cautious.y;
+      addLog(`${heroEmoji(h)} ${h.name} advances cautiously to (${cautious.x},${cautious.y}).`, 'info');
+      spendOrder();
+      return;
+    }
+  }
+
+  // 4. Otherwise advance toward closest enemy
+  if (reachable.length > 0) {
+    const best = reachable.reduce((a, b) =>
+      dist(a, closest) < dist(b, closest) ? a : b
+    );
+    h.x = best.x; h.y = best.y;
+    addLog(`${heroEmoji(h)} ${h.name} advances to (${best.x},${best.y}).`, 'info');
+    spendOrder();
+  } else {
+    spendOrder(); // stuck
+  }
+
+  if (state.ordersLeft > 0) {
+    setTimeout(aiTakeOrder, 2800);
+  } else {
+    h.led = true;
+    state.selectedModel = null;
+    setTimeout(aiTakeTurn, 2200);
+  }
+}
+
+// ============================================================
+// VICTORY
+// ============================================================
+function checkVictory() {
+  const p1alive = state.wb1.heroes.filter(h => !h.ko).length;
+  const p2alive = state.wb2.heroes.filter(h => !h.ko).length;
+  if (p1alive === 0) {
+    endGame(`${state.wb2.name} wins! The ${state.wb2.deity} survives the Apocathon!`);
+  } else if (p2alive === 0) {
+    endGame(`${state.wb1.name} wins! The ${state.wb1.deity} survives the Apocathon!`);
+  }
+}
+
+function endGame(msg) {
+  document.getElementById('victory-text').textContent = msg;
+  setTimeout(() => showScreen('victory'), 1200);
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function allHeroes() {
+  return [...state.wb1.heroes, ...state.wb2.heroes];
+}
+function getActiveWB() {
+  return state.activePlayer === 1 ? state.wb1 : state.wb2;
+}
+function dist(a, b) {
+  return Math.abs(a.x-b.x) + Math.abs(a.y-b.y);
+}
+function roll(numDice) {
+  let total = 0;
+  for (let i = 0; i < numDice; i++) total += Math.floor(Math.random()*6)+1;
+  return total;
+}
+
+// Emoji per MASH type
+const MASH_EMOJI = {
+  'Ranger':               '🏹',
+  'Berserker':            '🪓',
+  'Healer':               '💊',
+  'Knight':               '🛡️',
+  'Creature':             '🐾',
+  'Soldier':              '⚔️',
+  'Rogue':                '🗡️',
+  'Mage (Enchanter)':     '🔮',
+  'Mage (Necromancer)':   '💀',
+  'Mage (Druid)':         '🌿',
+  'Mage (War Mage)':      '⚡',
+  // villain / AI types
+  'Minion':               '👺',
+  'Undead':               '🧟',
+  'Beast':                '🐺',
+  'Goblinoid':            '👹',
+  'Dragon':               '🐉',
+  'Lich':                 '💀',
+  'Vampire':              '🧛',
+  'Berserker (AI)':       '🪓',
+};
+function heroEmoji(h) {
+  return MASH_EMOJI[h.mashType] || '⚔️';
+}
+
+// Die face unicode characters ⚀⚁⚂⚃⚄⚅
+const DIE_FACES = ['⚀','⚁','⚂','⚃','⚄','⚅'];
+
+// Show animated dice, resolve with callback after animation
+function showDiceRoll(d1, d2, label, resultHTML, callback) {
+  const overlay = document.getElementById('dice-overlay');
+  const die1el  = document.getElementById('die1');
+  const die2el  = document.getElementById('die2');
+  const labelEl = document.getElementById('dice-label');
+  const resultEl= document.getElementById('dice-result');
+
+  labelEl.textContent = label;
+  resultEl.innerHTML = '';
+
+  // Start with random tumble faces
+  die1el.textContent = DIE_FACES[Math.floor(Math.random()*6)];
+  die2el.textContent = DIE_FACES[Math.floor(Math.random()*6)];
+
+  overlay.classList.add('show');
+
+  // Trigger CSS roll animation
+  die1el.classList.remove('rolling');
+  die2el.classList.remove('rolling');
+  void die1el.offsetWidth; // reflow
+  die1el.classList.add('rolling');
+  die2el.classList.add('rolling');
+
+  // Tumble through random faces during animation
+  let tumbles = 0;
+  const tumbleInterval = setInterval(() => {
+    die1el.textContent = DIE_FACES[Math.floor(Math.random()*6)];
+    die2el.textContent = DIE_FACES[Math.floor(Math.random()*6)];
+    tumbles++;
+    if (tumbles >= 6) clearInterval(tumbleInterval);
+  }, 80);
+
+  // Land on final values after animation
+  setTimeout(() => {
+    die1el.textContent = DIE_FACES[d1 - 1];
+    die2el.textContent = DIE_FACES[d2 - 1];
+    die1el.classList.remove('rolling');
+    die2el.classList.remove('rolling');
+    resultEl.innerHTML = resultHTML;
+
+    // Auto-dismiss and callback
+    setTimeout(() => {
+      overlay.classList.remove('show');
+      if (callback) callback();
+    }, 900);
+  }, 600);
+}
+
+function showSlainBanner(targetName, attackerName) {
+  const banner = document.getElementById('slain-banner');
+  document.getElementById('slain-name').textContent = targetName;
+  document.getElementById('slain-killer').textContent = attackerName;
+
+  // Force re-show if already visible
+  banner.classList.remove('show', 'hide');
+  banner.style.display = 'block';
+  void banner.offsetWidth; // reflow to restart transition
+  banner.classList.add('show');
+
+  setTimeout(() => {
+    banner.classList.add('hide');
+    setTimeout(() => {
+      banner.classList.remove('show', 'hide');
+      banner.style.display = 'none';
+    }, 300);
+  }, 2000);
+}
+
+function addLog(msg, type) {
+  const el = document.getElementById('log-entries');
+  if (!el) return;
+  const div = document.createElement('div');
+  div.className = `log-entry ${type}`;
+  div.textContent = msg;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+// Apply the default theme (lava/earthy) on load so CSS vars are seeded
+applyTheme(selectedTheme);
+</script>
+</body>
+</html>
